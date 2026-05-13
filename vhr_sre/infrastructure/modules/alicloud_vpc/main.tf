@@ -28,8 +28,18 @@ resource "alicloud_vswitch" "database" {
   zone_id      = data.alicloud_zones.default.zones[0].id
 }
 
+resource "alicloud_security_group" "web_sg" {
+  security_group_name = "${var.vpc_name}-web-sg"
+  vpc_id = alicloud_vpc.this.id
+}
+
+resource "alicloud_security_group" "backend_sg" {
+  security_group_name = "${var.vpc_name}-backend-sg"
+  vpc_id = alicloud_vpc.this.id
+}
+
 resource "alicloud_security_group" "db_sg" {
-  name   = "${var.vpc_name}-db-sg"
+  security_group_name = "${var.vpc_name}-db-sg"
   vpc_id = alicloud_vpc.this.id
 }
 
@@ -43,5 +53,5 @@ resource "alicloud_security_group_rule" "allow_backend_to_db" {
   port_range        = "${each.value}/${each.value}"
   priority          = 1
   security_group_id = alicloud_security_group.db_sg.id
-  cidr_ip           = var.backend_cidr
+  cidr_ip           = alicloud_vswitch.backend.cidr_block
 }

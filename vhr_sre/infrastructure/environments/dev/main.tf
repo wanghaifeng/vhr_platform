@@ -1,3 +1,7 @@
+provider "alicloud" {
+  region = var.region
+}
+
 module "vpc" {
   source      = "../../modules/alicloud_vpc"
   environment = var.environment
@@ -7,6 +11,9 @@ module "vpc" {
   frontend_cidr = "10.0.1.0/24"
   backend_cidr  = "10.0.2.0/24"
   db_cidr       = "10.0.3.0/24"
+
+  # Pass allowed_db_ports for the security group rule in alicloud_vpc module
+  allowed_db_ports = ["3306"]
 }
 
 module "ecs" {
@@ -23,8 +30,8 @@ module "ecs" {
   }
   frontend_vswitch_id     = module.vpc.frontend_vswitch_id
   backend_vswitch_id      = module.vpc.backend_vswitch_id
-  frontend_security_group_id = module.vpc.web_security_group_id # Assuming web security group for frontend
-  backend_security_group_id  = module.vpc.backend_security_group_id # Assuming backend security group for backend
+  frontend_security_group_id = module.vpc.web_security_group_id
+  backend_security_group_id  = module.vpc.backend_security_group_id
 }
 
 module "rds" {
@@ -35,6 +42,10 @@ module "rds" {
   availability_zone = module.vpc.availability_zone
   security_ip_list  = [module.vpc.backend_cidr]
   mysql_root_password = var.mysql_root_password
+  mysql_version     = "8.0"
+  mysql_instance_type = "rds.mysql.c6.large"
+  mysql_instance_storage = 20
+  mysql_root_username = "root"
 }
 
 module "kvstore" {
@@ -45,6 +56,9 @@ module "kvstore" {
   availability_zone = module.vpc.availability_zone
   security_ip_list  = [module.vpc.backend_cidr]
   redis_password    = var.redis_password
+  redis_version     = "5.0"
+  redis_instance_type = "Redis"
+  redis_instance_storage = 10
 }
 
 module "oss" {

@@ -1,8 +1,7 @@
 resource "alicloud_oss_bucket" "app_storage" {
   bucket = "${var.environment}-vhr-app-storage"
-  acl    = "private"
   storage_class = "Standard"
-  force_destroy = true # For easy cleanup during development
+  force_destroy = true
 
   cors_rule {
     allowed_headers = ["*"]
@@ -26,4 +25,9 @@ resource "alicloud_oss_bucket" "app_storage" {
     project     = "vhr"
     role        = "app-storage"
   }
+}
+
+resource "alicloud_oss_bucket_acl" "app_storage_acl" {
+  bucket = alicloud_oss_bucket.app_storage.bucket
+  acl    = "private"
 }

@@ -18,6 +18,16 @@ output "db_vswitch_id" {
   value       = alicloud_vswitch.database.id
 }
 
+output "web_security_group_id" {
+  description = "The ID of the security group for web layer"
+  value       = alicloud_security_group.web_sg.id
+}
+
+output "backend_security_group_id" {
+  description = "The ID of the security group for backend layer"
+  value       = alicloud_security_group.backend_sg.id
+}
+
 output "db_security_group_id" {
   description = "The ID of the security group for database layer"
   value       = alicloud_security_group.db_sg.id
@@ -26,4 +36,9 @@ output "db_security_group_id" {
 output "availability_zone" {
   description = "The availability zone used for the subnets"
   value       = data.alicloud_zones.default.zones[0].id
+}
+
+output "backend_cidr" {
+  description = "The CIDR block of the backend VSwitch"
+  value       = alicloud_vswitch.backend.cidr_block
 }

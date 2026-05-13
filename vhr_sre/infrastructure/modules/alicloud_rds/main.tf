@@ -7,19 +7,18 @@ resource "alicloud_db_instance" "mysql" {
   db_instance_storage_type = "cloud_ssd"
   vpc_id           = var.vpc_id
   vswitch_id       = var.db_vswitch_id
-  security_ip_list = var.security_ip_list
+  # security_ip_list is deprecated, using security_ips instead
+  security_ips = var.security_ip_list 
   instance_name    = "${var.environment}-vhr-mysql"
   zone_id          = var.availability_zone
-  parameters = [
-    {
-      name  = "character_set_server"
-      value = "utf8mb4"
-    },
-    {
-      name  = "max_connections"
-      value = "200"
-    }
-  ]
+  parameters {
+    name  = "character_set_server"
+    value = "utf8mb4"
+  }
+  parameters {
+    name  = "max_connections"
+    value = "200"
+  }
   tags = {
     environment = var.environment
     project     = "vhr"
@@ -31,11 +30,10 @@ resource "alicloud_db_account" "mysql_root" {
   db_instance_id = alicloud_db_instance.mysql.id
   account_name   = var.mysql_root_username
   account_password = var.mysql_root_password
-  description    = "Root account for vhr-mysql"
+  account_description = "Root account for vhr-mysql"
 }
 
 resource "alicloud_db_database" "vhr_db" {
-  db_instance_id = alicloud_db_instance.mysql.id
-  db_name        = "vhr"
-  character_set_name = "utf8mb4"
+  instance_id = alicloud_db_instance.mysql.id
+  data_base_name = "vhr"
 }

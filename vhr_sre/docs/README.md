@@ -2,6 +2,71 @@
 
 This repository contains the Infrastructure as Code (Terraform), CI/CD pipelines, and Policy as Code (OPA) configurations for the VHR application.
 
+---
+
+## 0. Prerequisites - Credential Setup
+
+Before running Terraform, you must configure the following credentials:
+
+### Alibaba Cloud Access Key (AKSK)
+
+**Option 1: Using Alibaba Cloud CLI (Recommended)**
+```bash
+aliyun configure
+# Follow prompts to enter AccessKey ID and AccessKey Secret
+```
+
+**Option 2: Using Environment Variables (Linux/macOS)**
+```bash
+export ALICLOUD_ACCESS_KEY="your-access-key-id"
+export ALICLOUD_SECRET_KEY="your-access-key-secret"
+```
+
+**Option 3: Using Environment Variables (Windows CMD)**
+```cmd
+set ALICLOUD_ACCESS_KEY=your-access-key-id
+set ALICLOUD_SECRET_KEY=your-access-key-secret
+```
+
+**Option 4: Using Environment Variables (Windows PowerShell)**
+```powershell
+$env:ALICLOUD_ACCESS_KEY = "your-access-key-id"
+$env:ALICLOUD_SECRET_KEY = "your-access-key-secret"
+```
+
+**Option 5: System Environment Variables (Windows - Permanent)**
+```cmd
+setx ALICLOUD_ACCESS_KEY "your-access-key-id"
+setx ALICLOUD_SECRET_KEY "your-access-key-secret"
+```
+> Note: After using `setx`, restart your terminal for changes to take effect.
+
+### MySQL and Redis Passwords
+
+Terraform requires MySQL root password and Redis password. Set them via environment variables:
+
+**Linux/macOS:**
+```bash
+export TF_VAR_mysql_root_password="your-mysql-password"
+export TF_VAR_redis_password="your-redis-password"
+```
+
+**Windows CMD:**
+```cmd
+set TF_VAR_mysql_root_password=your-mysql-password
+set TF_VAR_redis_password=your-redis-password
+```
+
+**Windows PowerShell:**
+```powershell
+$env:TF_VAR_mysql_root_password = "your-mysql-password"
+$env:TF_VAR_redis_password = "your-redis-password"
+```
+
+> ⚠️ **Security Note**: Never commit passwords to version control. Use environment variables or secret management tools in CI/CD pipelines.
+
+---
+
 ## 1. CI/CD Pipelines Setup (GitHub Actions & Harness)
 
 ### GitHub Actions (Continuous Integration)

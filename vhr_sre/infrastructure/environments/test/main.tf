@@ -1,3 +1,7 @@
+provider "alicloud" {
+  region = var.region
+}
+
 module "vpc" {
   source      = "../../modules/alicloud_vpc"
   environment = var.environment
@@ -7,6 +11,8 @@ module "vpc" {
   frontend_cidr = "10.4.1.0/24"
   backend_cidr  = "10.4.2.0/24"
   db_cidr       = "10.4.3.0/24"
+
+  allowed_db_ports = ["3306", "5672", "6379"]
 }
 
 module "ecs" {
@@ -46,7 +52,7 @@ module "kvstore" {
   db_vswitch_id     = module.vpc.db_vswitch_id
   availability_zone = module.vpc.availability_zone
   security_ip_list  = [module.vpc.backend_cidr]
-  redis_instance_type = "redis.master.micro.default"
+  redis_instance_type = "Redis"
   redis_instance_storage = 10
   redis_password    = var.redis_password
 }
