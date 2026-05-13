@@ -1,0 +1,62 @@
+pipeline:
+  name: VHR Infrastructure Deploy
+  identifier: VHR_Infrastructure_Deploy
+  projectIdentifier: Default
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Terraform Plan and Apply
+        identifier: Terraform_Plan_and_Apply
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Terraform Init
+                  identifier: Terraform_Init
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: hashicorp/terraform:1.6.0
+                    shell: Sh
+                    command: |-
+                      cd vhr_sre/infrastructure
+                      terraform init
+              - step:
+                  type: Run
+                  name: Terraform Plan
+                  identifier: Terraform_Plan
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: hashicorp/terraform:1.6.0
+                    shell: Sh
+                    command: |-
+                      cd vhr_sre/infrastructure
+                      terraform plan -out=tfplan
+              - step:
+                  type: HarnessApproval
+                  name: Approval
+                  identifier: Approval
+                  spec:
+                    approvalMessage: Please review the terraform plan before applying.
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      userGroups:
+                        - account._user_all
+                    minimumCount: 1
+                    isAutoRejectEnabled: false
+                    approverInputs: []
+              - step:
+                  type: Run
+                  name: Terraform Apply
+                  identifier: Terraform_Apply
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: hashicorp/terraform:1.6.0
+                    shell: Sh
+                    command: |-
+                      cd vhr_sre/infrastructure
+                      terraform apply -auto-approve tfplan
+        tags: {}

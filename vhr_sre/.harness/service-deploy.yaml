@@ -1,0 +1,65 @@
+pipeline:
+  name: VHR Service Deploy
+  identifier: VHR_Service_Deploy
+  projectIdentifier: Default
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Build and Deploy
+        identifier: Build_and_Deploy
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Build Backend
+                  identifier: Build_Backend
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: maven:3.8-openjdk-8
+                    shell: Sh
+                    command: |-
+                      cd vhr/vhr/vhrserver
+                      mvn clean package -DskipTests
+              - step:
+                  type: Run
+                  name: Build Frontend
+                  identifier: Build_Frontend
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: node:16
+                    shell: Sh
+                    command: |-
+                      cd vhr/vuehr
+                      npm install
+                      npm run build
+              - step:
+                  type: HarnessApproval
+                  name: Approval
+                  identifier: Approval
+                  spec:
+                    approvalMessage: Please review the build before deploying to production.
+                    includePipelineExecutionHistory: true
+                    approvers:
+                      userGroups:
+                        - account._user_all
+                    minimumCount: 1
+                    isAutoRejectEnabled: false
+                    approverInputs: []
+              - step:
+                  type: Run
+                  name: Deploy to Server
+                  identifier: Deploy_to_Server
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: alpine:latest
+                    shell: Sh
+                    command: |-
+                      # Example deployment script
+                      echo "Deploying backend jar to remote server..."
+                      echo "Deploying frontend dist to nginx..."
+                      echo "Deployment complete."
+        tags: {}
