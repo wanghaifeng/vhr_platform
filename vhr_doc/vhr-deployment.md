@@ -1,88 +1,88 @@
-# vhr 项目部署文档
+# vhr Project Deployment Documentation
 
-## 文档信息
+## Document Information
 
-| 项目名称 | vhr (微人事管理系统) |
-|---------|-------------------|
-| 文档版本 | v1.0 |
-| 编写日期 | 2026-05-11 |
-| 文档类型 | 部署文档 |
-
----
-
-## 1. 部署概述
-
-### 1.1 系统架构
-
-vhr 是一个前后端分离的企业人事管理系统，主要包含以下组件：
-
-- **前端**：Vue.js 单页面应用
-- **后端**：Spring Boot 微服务（vhr-web + mailserver）
-- **数据库**：MySQL 8.0+
-- **缓存**：Redis
-- **消息队列**：RabbitMQ
-- **文件存储**：FastDFS（可选）
-- **反向代理**：Nginx
-
-### 1.2 部署方式
-
-本文档支持以下部署方式：
-
-1. **开发环境部署**：适用于本地开发和测试
-2. **生产环境部署**：适用于生产环境上线
-3. **Docker 容器化部署**：适用于云环境部署（可选）
+| Project Name | vhr (Micro HR Management System) |
+|--------------|----------------------------------|
+| Document Version | v1.0                             |
+| Creation Date | 2026-05-11                       |
+| Document Type | Deployment Documentation         |
 
 ---
 
-## 2. 环境要求
+## 1. Deployment Overview
 
-### 2.1 硬件要求
+### 1.1 System Architecture
 
-| 环境 | CPU | 内存 | 磁盘 | 说明 |
-|-----|-----|------|------|------|
-| 开发环境 | 2核+ | 4GB+ | 20GB+ | 本地开发机器 |
-| 测试环境 | 4核+ | 8GB+ | 50GB+ | 测试服务器 |
-| 生产环境 | 8核+ | 16GB+ | 100GB+ | 生产服务器 |
+vhr is a front-end and back-end separated enterprise HR management system, mainly including the following components:
 
-### 2.2 软件要求
+- **Frontend**: Vue.js Single Page Application
+- **Backend**: Spring Boot Microservices (vhr-web + mailserver)
+- **Database**: MySQL 8.0+
+- **Cache**: Redis
+- **Message Queue**: RabbitMQ
+- **File Storage**: FastDFS (Optional)
+- **Reverse Proxy**: Nginx
 
-| 软件名称 | 版本要求 | 必需 | 说明 |
-|---------|---------|------|------|
-| JDK | 1.8+ | 是 | Java 运行环境 |
-| MySQL | 8.0+ | 是 | 关系型数据库 |
-| Redis | 5.0+ | 是 | 缓存数据库 |
-| RabbitMQ | 3.8+ | 是 | 消息队列 |
-| Node.js | 12.0+ | 是 | 前端构建环境 |
-| Maven | 3.6+ | 是 | Java 构建工具 |
-| Nginx | 1.18+ | 否 | 反向代理（生产环境推荐） |
-| FastDFS | 5.0+ | 否 | 文件存储（可选） |
+### 1.2 Deployment Methods
 
-### 2.3 端口要求
+This document supports the following deployment methods:
 
-| 服务 | 默认端口 | 说明 |
-|-----|---------|------|
-| vhr-web | 8081 | 主服务端口 |
-| mailserver | 8082 | 邮件服务端口 |
-| MySQL | 3306 | 数据库端口 |
-| Redis | 6379 | 缓存端口 |
-| RabbitMQ | 5672 | 消息队列端口 |
-| RabbitMQ 管理 | 15672 | RabbitMQ 管理界面 |
-| Nginx | 80/443 | 反向代理端口 |
+1. **Development Environment Deployment**: Suitable for local development and testing.
+2. **Production Environment Deployment**: Suitable for production launch.
+3. **Docker Containerized Deployment**: Suitable for cloud environment deployment (Optional).
 
 ---
 
-## 3. 数据库部署
+## 2. Environment Requirements
 
-### 3.1 安装 MySQL
+### 2.1 Hardware Requirements
 
-**Windows 环境：**
+| Environment | CPU  | Memory | Disk   | Description        |
+|-------------|------|--------|--------|--------------------|
+| Development | 2 Cores+ | 4GB+   | 20GB+  | Local development machine |
+| Test        | 4 Cores+ | 8GB+   | 50GB+  | Test server        |
+| Production  | 8 Cores+ | 16GB+  | 100GB+ | Production server  |
 
-1. 下载 MySQL 8.0+ 安装包：https://dev.mysql.com/downloads/mysql/
-2. 运行安装程序，选择 "Developer Default" 安装类型
-3. 设置 root 用户密码（建议：生产环境使用强密码）
-4. 完成安装并启动 MySQL 服务
+### 2.2 Software Requirements
 
-**Linux 环境：**
+| Software Name | Version Requirement | Required | Description          |
+|---------------|---------------------|----------|----------------------|
+| JDK           | 1.8+                | Yes      | Java Runtime Environment |
+| MySQL         | 8.0+                | Yes      | Relational Database    |
+| Redis         | 5.0+                | Yes      | Cache Database         |
+| RabbitMQ      | 3.8+                | Yes      | Message Queue          |
+| Node.js       | 12.0+               | Yes      | Frontend build environment |
+| Maven         | 3.6+                | Yes      | Java Build Tool        |
+| Nginx         | 1.18+               | No       | Reverse proxy (recommended for production) |
+| FastDFS       | 5.0+                | No       | File storage (optional) |
+
+### 2.3 Port Requirements
+
+| Service      | Default Port | Description        |
+|--------------|--------------|--------------------|
+| vhr-web      | 8081         | Main service port  |
+| mailserver   | 8082         | Email service port |
+| MySQL        | 3306         | Database port      |
+| Redis        | 6379         | Cache port         |
+| RabbitMQ     | 5672         | Message queue port |
+| RabbitMQ Management | 15672        | RabbitMQ management interface |
+| Nginx        | 80/443       | Reverse proxy port |
+
+---
+
+## 3. Database Deployment
+
+### 3.1 Install MySQL
+
+**Windows Environment:**
+
+1. Download MySQL 8.0+ installer: https://dev.mysql.com/downloads/mysql/
+2. Run the installer, select "Developer Default" installation type.
+3. Set the root user password (Recommendation: use a strong password for production).
+4. Complete the installation and start the MySQL service.
+
+**Linux Environment:**
 
 ```bash
 # Ubuntu/Debian
@@ -92,75 +92,75 @@ sudo apt install mysql-server
 # CentOS/RHEL
 sudo yum install mysql-server
 
-# 启动服务
+# Start service
 sudo systemctl start mysql
 sudo systemctl enable mysql
 
-# 安全配置
+# Security configuration
 sudo mysql_secure_installation
 ```
 
-### 3.2 创建数据库
+### 3.2 Create Database
 
 ```sql
--- 登录 MySQL
+-- Log in to MySQL
 mysql -u root -p
 
--- 创建数据库
+-- Create database
 CREATE DATABASE vhr DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
--- 创建用户（可选，生产环境推荐）
+-- Create user (Optional, recommended for production)
 CREATE USER 'vhr_user'@'%' IDENTIFIED BY 'your_password';
 GRANT ALL PRIVILEGES ON vhr.* TO 'vhr_user'@'%';
 FLUSH PRIVILEGES;
 ```
 
-### 3.3 导入数据库脚本
+### 3.3 Import Database Script
 
 ```bash
-# 导入 SQL 文件
+# Import SQL file
 mysql -u root -p vhr < D:/Projects/dxyy/vhr/vhr.sql
 
-# 或使用 MySQL 命令行
+# Or use MySQL command line
 mysql> use vhr;
 mysql> source D:/Projects/dxyy/vhr/vhr.sql;
 ```
 
-### 3.4 验证数据库
+### 3.4 Verify Database
 
 ```sql
--- 查看表结构
+-- View table structure
 USE vhr;
 SHOW TABLES;
 
--- 应该看到以下表
--- employee, department, position, joblevel, salary, 
--- adjustsalary, appraise, hr, role, menu, menu_role, 
+-- You should see the following tables
+-- employee, department, position, joblevel, salary,
+-- adjustsalary, appraise, hr, role, menu, menu_role,
 -- mail_send_log, etc.
 ```
 
 ---
 
-## 4. Redis 部署
+## 4. Redis Deployment
 
-### 4.1 安装 Redis
+### 4.1 Install Redis
 
-**Windows 环境：**
+**Windows Environment:**
 
-1. 下载 Redis for Windows：https://github.com/microsoftarchive/redis/releases
-2. 解压到指定目录（如：C:\Redis）
-3. 修改 `redis.windows.conf` 配置文件：
+1. Download Redis for Windows: https://github.com/microsoftarchive/redis/releases
+2. Extract to a specified directory (e.g., C:\Redis).
+3. Modify `redis.windows.conf` configuration file:
    ```
    bind 127.0.0.1
    port 6379
    requirepass 123
    ```
-4. 启动 Redis 服务：
+4. Start Redis service:
    ```cmd
    redis-server.exe redis.windows.conf
    ```
 
-**Linux 环境：**
+**Linux Environment:**
 
 ```bash
 # Ubuntu/Debian
@@ -170,26 +170,26 @@ sudo apt install redis-server
 # CentOS/RHEL
 sudo yum install redis
 
-# 修改配置文件
+# Modify configuration file
 sudo vi /etc/redis/redis.conf
-# 设置：bind 127.0.0.1
-# 设置：requirepass your_password
+# Set: bind 127.0.0.1
+# Set: requirepass your_password
 
-# 启动服务
+# Start service
 sudo systemctl start redis
 sudo systemctl enable redis
 
-# 测试连接
+# Test connection
 redis-cli -a your_password ping
 ```
 
-### 4.2 验证 Redis
+### 4.2 Verify Redis
 
 ```bash
-# 连接 Redis
+# Connect to Redis
 redis-cli -h 127.0.0.1 -p 6379 -a 123
 
-# 测试命令
+# Test commands
 127.0.0.1:6379> ping
 PONG
 
@@ -202,22 +202,22 @@ OK
 
 ---
 
-## 5. RabbitMQ 部署
+## 5. RabbitMQ Deployment
 
-### 5.1 安装 RabbitMQ
+### 5.1 Install RabbitMQ
 
-**Windows 环境：**
+**Windows Environment:**
 
-1. 下载并安装 Erlang：https://www.erlang.org/downloads
-2. 下载 RabbitMQ 安装包：https://www.rabbitmq.com/download.html
-3. 安装 RabbitMQ
-4. 启动管理插件：
+1. Download and install Erlang: https://www.erlang.org/downloads
+2. Download RabbitMQ installer: https://www.rabbitmq.com/download.html
+3. Install RabbitMQ.
+4. Enable management plugin:
    ```cmd
    rabbitmq-plugins enable rabbitmq_management
    ```
-5. 访问管理界面：http://localhost:15672（默认账号：guest/guest）
+5. Access management interface: http://localhost:15672 (default account: guest/guest).
 
-**Linux 环境：**
+**Linux Environment:**
 
 ```bash
 # Ubuntu/Debian
@@ -227,88 +227,88 @@ sudo apt install rabbitmq-server
 # CentOS/RHEL
 sudo yum install rabbitmq-server
 
-# 启动服务
+# Start service
 sudo systemctl start rabbitmq-server
 sudo systemctl enable rabbitmq-server
 
-# 启用管理插件
+# Enable management plugin
 sudo rabbitmq-plugins enable rabbitmq_management
 
-# 添加用户（可选）
+# Add user (Optional)
 sudo rabbitmqctl add_user vhr_user your_password
 sudo rabbitmqctl set_user_tags vhr_user administrator
 sudo rabbitmqctl set_permissions -p / vhr_user ".*" ".*" ".*"
 ```
 
-### 5.2 验证 RabbitMQ
+### 5.2 Verify RabbitMQ
 
 ```bash
-# 查看状态
+# Check status
 sudo rabbitmqctl status
 
-# 查看用户列表
+# View user list
 sudo rabbitmqctl list_users
 
-# 访问管理界面
-# 浏览器打开：http://localhost:15672
-# 用户名：guest，密码：guest
+# Access management interface
+# Open in browser: http://localhost:15672
+# Username: guest, Password: guest
 ```
 
 ---
 
-## 6. 后端部署
+## 6. Backend Deployment
 
-### 6.1 修改配置文件
+### 6.1 Modify Configuration File
 
-配置文件位置：`D:/Projects/dxyy/vhr/vhr/vhrserver/vhr-web/src/main/resources/application.yml`
+Configuration file location: `D:/Projects/dxyy/vhr/vhr/vhrserver/vhr-web/src/main/resources/application.yml`
 
-**主要配置项：**
+**Main Configuration Items:**
 
 ```yaml
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    username: root                    # MySQL 用户名
-    password: 123                     # MySQL 密码
+    username: root                    # MySQL Username
+    password: 123                     # MySQL Password
     url: jdbc:mysql://localhost:3306/vhr?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     
   rabbitmq:
-    username: guest                   # RabbitMQ 用户名
-    password: guest                   # RabbitMQ 密码
-    host: 127.0.0.1                   # RabbitMQ 主机地址
+    username: guest                   # RabbitMQ Username
+    password: guest                   # RabbitMQ Password
+    host: 127.0.0.1                   # RabbitMQ Host Address
     publisher-confirms: true
     publisher-returns: true
     
   redis:
-    host: 127.0.0.1                   # Redis 主机地址
+    host: 127.0.0.1                   # Redis Host Address
     database: 0
-    port: 6379                        # Redis 端口
-    password: 123                     # Redis 密码
+    port: 6379                        # Redis Port
+    password: 123                     # Redis Password
     
   cache:
     cache-names: menus_cache
     
 server:
-  port: 8081                          # 服务端口
+  port: 8081                          # Service Port
   compression:
     enabled: true
     
 fastdfs:
   nginx:
-    host: http://192.168.91.128/     # FastDFS 地址（可选）
+    host: http://192.168.91.128/     # FastDFS Address (Optional)
 ```
 
-**生产环境配置建议：**
+**Production Environment Configuration Suggestions:**
 
 ```yaml
 spring:
   datasource:
-    username: vhr_user               # 使用专用数据库用户
-    password: strong_password_here   # 使用强密码
+    username: vhr_user               # Use dedicated database user
+    password: strong_password_here   # Use strong password
     url: jdbc:mysql://your-db-host:3306/vhr?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=true
     
   rabbitmq:
-    username: vhr_user               # 使用专用 RabbitMQ 用户
+    username: vhr_user               # Use dedicated RabbitMQ user
     password: strong_password_here
     host: your-rabbitmq-host
     
@@ -317,47 +317,47 @@ spring:
     password: strong_password_here
 ```
 
-### 6.2 构建项目
+### 6.2 Build Project
 
-**方式一：使用 Maven 命令**
+**Method One: Using Maven Command**
 
 ```bash
-# 进入后端项目目录
+# Enter backend project directory
 cd D:/Projects/dxyy/vhr/vhr/vhrserver
 
-# 清理并打包（跳过测试）
+# Clean and package (skip tests)
 mvn clean package -DskipTests
 
-# 生成的 JAR 包位置：
+# Generated JAR package location:
 # vhr-web/target/vhr-web-xxx.jar
 ```
 
-**方式二：使用 IDE**
+**Method Two: Using IDE**
 
-1. 使用 IntelliJ IDEA 或 Eclipse 打开项目
-2. 右键项目 → Run As → Maven build
-3. Goals 输入：`clean package -DskipTests`
-4. 点击 Run
+1. Open project with IntelliJ IDEA or Eclipse.
+2. Right-click project → Run As → Maven build.
+3. Enter Goals: `clean package -DskipTests`.
+4. Click Run.
 
-### 6.3 启动主服务
+### 6.3 Start Main Service
 
-**开发环境：**
+**Development Environment:**
 
 ```bash
-# 方式一：直接运行 JAR 包
+# Method One: Directly run JAR package
 cd D:/Projects/dxyy/vhr/vhr/vhrserver/vhr-web/target
 java -jar vhr-web-1.0.jar
 
-# 方式二：指定配置文件
+# Method Two: Specify configuration file
 java -jar vhr-web-1.0.jar --spring.config.location=application.yml
 
-# 方式三：后台运行（Linux）
+# Method Three: Run in background (Linux)
 nohup java -jar vhr-web-1.0.jar > vhr.log 2>&1 &
 ```
 
-**生产环境（推荐使用 systemd）：**
+**Production Environment (systemd recommended):**
 
-创建服务文件 `/etc/systemd/system/vhr-web.service`：
+Create service file `/etc/systemd/system/vhr-web.service`:
 
 ```ini
 [Unit]
@@ -377,7 +377,7 @@ RestartSec=10
 WantedBy=multi-user.target
 ```
 
-启动服务：
+Start service:
 
 ```bash
 sudo systemctl daemon-reload
@@ -386,14 +386,14 @@ sudo systemctl enable vhr-web
 sudo systemctl status vhr-web
 ```
 
-### 6.4 部署邮件服务（可选）
+### 6.4 Deploy Email Service (Optional)
 
-**修改配置文件：**
+**Modify Configuration File:**
 
-位置：`D:/Projects/dxyy/vhr/vhr/mailserver/src/main/resources/application.properties`
+Location: `D:/Projects/dxyy/vhr/vhr/mailserver/src/main/resources/application.properties`
 
 ```properties
-# 邮件服务器配置
+# Email server configuration
 spring.mail.host=smtp.your-email-provider.com
 spring.mail.port=587
 spring.mail.username=your-email@example.com
@@ -401,16 +401,16 @@ spring.mail.password=your-email-password
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-# RabbitMQ 配置
+# RabbitMQ configuration
 spring.rabbitmq.host=127.0.0.1
 spring.rabbitmq.username=guest
 spring.rabbitmq.password=guest
 
-# 服务端口
+# Service port
 server.port=8082
 ```
 
-**构建并启动：**
+**Build and Start:**
 
 ```bash
 cd D:/Projects/dxyy/vhr/vhr/mailserver
@@ -418,127 +418,127 @@ mvn clean package -DskipTests
 java -jar target/mailserver-1.0.jar
 ```
 
-### 6.5 验证后端服务
+### 6.5 Verify Backend Service
 
 ```bash
-# 检查服务是否启动
+# Check if service is started
 curl http://localhost:8081
 
-# 查看日志
+# View logs
 tail -f vhr.log
 
-# 检查端口占用
+# Check port usage
 netstat -an | grep 8081
 ```
 
 ---
 
-## 7. 前端部署
+## 7. Frontend Deployment
 
-### 7.1 安装依赖
+### 7.1 Install Dependencies
 
 ```bash
-# 进入前端项目目录
+# Enter frontend project directory
 cd D:/Projects/dxyy/vhr/vuehr
 
-# 安装 Node.js 依赖
+# Install Node.js dependencies
 npm install
 
-# 或使用国内镜像加速
+# Or use domestic mirror for faster installation
 npm install --registry=https://registry.npmmirror.com
 ```
 
-### 7.2 修改后端 API 地址
+### 7.2 Modify Backend API Address
 
-修改文件：`D:/Projects/dxyy/vhr/vuehr/src/utils/api.js`
+Modify file: `D:/Projects/dxyy/vhr/vuehr/src/utils/api.js`
 
 ```javascript
-// 开发环境
+// Development environment
 let base = 'http://localhost:8081';
 
-// 生产环境
+// Production environment
 let base = 'http://your-server-ip:8081';
-// 或使用 Nginx 代理
+// Or use Nginx proxy
 let base = '/api';
 ```
 
-### 7.3 开发环境运行
+### 7.3 Development Environment Run
 
 ```bash
-# 启动开发服务器
+# Start development server
 npm run serve
 
-# 默认访问地址：http://localhost:8080
+# Default access address: http://localhost:8080
 ```
 
-### 7.4 生产环境构建
+### 7.4 Production Environment Build
 
 ```bash
-# 构建生产版本
+# Build production version
 npm run build
 
-# 生成的文件在 dist/ 目录
+# Generated files are in dist/ directory
 ```
 
-构建后的目录结构：
+Generated directory structure:
 
 ```
 dist/
-├── index.html           # 入口 HTML
-├── css/                 # CSS 文件
+├── index.html           # Entry HTML
+├── css/                 # CSS files
 │   ├── app.xxx.css
 │   └── chunk-xxx.css
-├── js/                  # JavaScript 文件
+├── js/                  # JavaScript files
 │   ├── app.xxx.js
 │   ├── chunk-xxx.js
 │   └── ...
-└── img/                 # 图片资源
+└── img/                 # Image resources
 ```
 
-### 7.5 部署前端静态文件
+### 7.5 Deploy Frontend Static Files
 
-**方式一：使用 Nginx（推荐）**
+**Method One: Using Nginx (Recommended)**
 
-详见第 8 节 Nginx 配置。
+See Section 8 Nginx Configuration for details.
 
-**方式二：使用后端静态资源**
+**Method Two: Using Backend Static Resources**
 
-将 `dist/` 目录内容复制到后端静态资源目录：
+Copy `dist/` directory contents to backend static resource directory:
 
 ```bash
-# Spring Boot 默认静态资源目录
+# Spring Boot default static resource directory
 cp -r dist/* D:/Projects/dxyy/vhr/vhr/vhrserver/vhr-web/src/main/resources/static/
 ```
 
-**方式三：使用独立静态服务器**
+**Method Three: Using Independent Static Server**
 
 ```bash
-# 使用 serve 工具
+# Use serve tool
 npm install -g serve
 serve -s dist -p 80
 
-# 使用 http-server 工具
+# Use http-server tool
 npm install -g http-server
 http-server dist -p 80
 ```
 
 ---
 
-## 8. Nginx 配置（生产环境推荐）
+## 8. Nginx Configuration (Recommended for Production)
 
-### 8.1 安装 Nginx
+### 8.1 Install Nginx
 
-**Windows 环境：**
+**Windows Environment:**
 
-1. 下载 Nginx：http://nginx.org/en/download.html
-2. 解压到指定目录（如：C:\nginx）
-3. 启动 Nginx：
+1. Download Nginx: http://nginx.org/en/download.html
+2. Extract to a specified directory (e.g., C:\nginx).
+3. Start Nginx:
    ```cmd
    cd C:\nginx
    start nginx
    ```
 
-**Linux 环境：**
+**Linux Environment:**
 
 ```bash
 # Ubuntu/Debian
@@ -548,35 +548,35 @@ sudo apt install nginx
 # CentOS/RHEL
 sudo yum install nginx
 
-# 启动服务
+# Start service
 sudo systemctl start nginx
 sudo systemctl enable nginx
 ```
 
-### 8.2 配置 Nginx
+### 8.2 Configure Nginx
 
-创建或修改配置文件：`/etc/nginx/conf.d/vhr.conf`（Linux）或 `nginx/conf/nginx.conf`（Windows）
+Create or modify configuration file: `/etc/nginx/conf.d/vhr.conf` (Linux) or `nginx/conf/nginx.conf` (Windows)
 
 ```nginx
 upstream vhr_backend {
     server 127.0.0.1:8081;
-    # 多实例负载均衡
+    # Multi-instance load balancing
     # server 127.0.0.1:8082;
     # server 127.0.0.1:8083;
 }
 
 server {
     listen 80;
-    server_name your-domain.com;  # 替换为你的域名或 IP
+    server_name your-domain.com;  # Replace with your domain or IP
     
-    # 前端静态文件
+    # Frontend static files
     location / {
-        root /opt/vhr/dist;       # 前端 dist 目录路径
+        root /opt/vhr/dist;       # Frontend dist directory path
         index index.html;
-        try_files $uri $uri/ /index.html;  # 支持 Vue Router history 模式
+        try_files $uri $uri/ /index.html;  # Support Vue Router history mode
     }
     
-    # 后端 API 代理
+    # Backend API proxy
     location /api/ {
         proxy_pass http://vhr_backend/;
         proxy_set_header Host $host;
@@ -584,13 +584,13 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
-        # WebSocket 支持
+        # WebSocket support
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
     }
     
-    # WebSocket 代理
+    # WebSocket proxy
     location /ws/ {
         proxy_pass http://vhr_backend/ws/;
         proxy_http_version 1.1;
@@ -598,12 +598,12 @@ server {
         proxy_set_header Connection "upgrade";
     }
     
-    # Gzip 压缩
+    # Gzip compression
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml;
     gzip_min_length 1024;
     
-    # 静态资源缓存
+    # Static resource caching
     location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
         expires 7d;
         add_header Cache-Control "public, immutable";
@@ -611,23 +611,23 @@ server {
 }
 ```
 
-### 8.3 HTTPS 配置（推荐）
+### 8.3 HTTPS Configuration (Recommended)
 
 ```nginx
 server {
     listen 443 ssl http2;
     server_name your-domain.com;
     
-    # SSL 证书配置
+    # SSL certificate configuration
     ssl_certificate /path/to/your/cert.pem;
     ssl_certificate_key /path/to/your/key.pem;
     
-    # SSL 安全配置
+    # SSL security configuration
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
     
-    # 其他配置同上
+    # Other configurations as above
     location / {
         root /opt/vhr/dist;
         index index.html;
@@ -643,7 +643,7 @@ server {
     }
 }
 
-# HTTP 重定向到 HTTPS
+# HTTP redirect to HTTPS
 server {
     listen 80;
     server_name your-domain.com;
@@ -651,206 +651,206 @@ server {
 }
 ```
 
-### 8.4 重启 Nginx
+### 8.4 Restart Nginx
 
 ```bash
-# 测试配置文件
+# Test configuration file
 sudo nginx -t
 
-# 重启 Nginx
+# Restart Nginx
 sudo systemctl restart nginx
 
-# 或重新加载配置（不中断服务）
+# Or reload configuration (without interrupting service)
 sudo systemctl reload nginx
 
-# Windows 环境
+# Windows Environment
 nginx -t
 nginx -s reload
 ```
 
 ---
 
-## 9. FastDFS 部署（可选）
+## 9. FastDFS Deployment (Optional)
 
-如果需要文件上传功能，需部署 FastDFS。
+If file upload functionality is required, FastDFS needs to be deployed.
 
-### 9.1 安装 FastDFS
+### 9.1 Install FastDFS
 
-详细安装步骤请参考 FastDFS 官方文档：https://github.com/happyfish100/fastdfs
+Refer to the official FastDFS documentation for detailed installation steps: https://github.com/happyfish100/fastdfs
 
-### 9.2 修改配置
+### 9.2 Modify Configuration
 
-修改后端配置文件：
+Modify backend configuration file:
 
 ```yaml
 fastdfs:
   nginx:
-    host: http://your-fastdfs-host/  # FastDFS Nginx 访问地址
+    host: http://your-fastdfs-host/  # FastDFS Nginx access address
 ```
 
 ---
 
-## 10. 完整部署流程
+## 10. Complete Deployment Process
 
-### 10.1 开发环境部署流程
+### 10.1 Development Environment Deployment Process
 
 ```bash
-# 1. 启动 MySQL（已安装并导入数据）
-# 2. 启动 Redis
+# 1. Start MySQL (already installed and data imported)
+# 2. Start Redis
 redis-server
 
-# 3. 启动 RabbitMQ
+# 3. Start RabbitMQ
 rabbitmq-server
 
-# 4. 启动后端
+# 4. Start Backend
 cd D:/Projects/dxyy/vhr/vhr/vhrserver
 mvn clean package -DskipTests
 java -jar vhr-web/target/vhr-web-1.0.jar
 
-# 5. 启动前端
+# 5. Start Frontend
 cd D:/Projects/dxyy/vhr/vuehr
 npm install
 npm run serve
 
-# 6. 访问系统
-# 前端：http://localhost:8080
-# 后端：http://localhost:8081
+# 6. Access System
+# Frontend: http://localhost:8080
+# Backend: http://localhost:8081
 ```
 
-### 10.2 生产环境部署流程
+### 10.2 Production Environment Deployment Process
 
 ```bash
-# 1. 确保所有依赖服务已启动
+# 1. Ensure all dependent services are started
 sudo systemctl status mysql
 sudo systemctl status redis
 sudo systemctl status rabbitmq-server
 
-# 2. 构建后端
+# 2. Build Backend
 cd /opt/vhr/vhr/vhrserver
 mvn clean package -DskipTests
 
-# 3. 启动后端服务
+# 3. Start Backend Service
 sudo systemctl start vhr-web
-sudo systemctl start mailserver  # 可选
+sudo systemctl start mailserver  # Optional
 
-# 4. 构建前端
+# 4. Build Frontend
 cd /opt/vhr/vuehr
 npm install
 npm run build
 
-# 5. 部署前端到 Nginx
+# 5. Deploy Frontend to Nginx
 sudo cp -r dist/* /usr/share/nginx/html/
 
-# 6. 配置并启动 Nginx
+# 6. Configure and Start Nginx
 sudo nginx -t
 sudo systemctl restart nginx
 
-# 7. 访问系统
-# 浏览器打开：http://your-domain.com
+# 7. Access System
+# Open in browser: http://your-domain.com
 ```
 
 ---
 
-## 11. 验证部署
+## 11. Verify Deployment
 
-### 11.1 检查服务状态
+### 11.1 Check Service Status
 
 ```bash
-# 检查后端服务
+# Check backend service
 curl http://localhost:8081
 
-# 检查前端
+# Check frontend
 curl http://localhost
 
-# 检查数据库连接
+# Check database connection
 mysql -u root -p -e "use vhr; show tables;"
 
-# 检查 Redis 连接
+# Check Redis connection
 redis-cli -a your_password ping
 
-# 检查 RabbitMQ 连接
+# Check RabbitMQ connection
 rabbitmqctl status
 ```
 
-### 11.2 访问系统
+### 11.2 Access System
 
-打开浏览器访问：http://your-domain.com 或 http://localhost
+Open browser and access: http://your-domain.com or http://localhost
 
-**默认管理员账号：**
+**Default Administrator Account:**
 
-根据数据库初始化脚本，默认账号可能为：
+According to the database initialization script, the default account may be:
 
-- 用户名：admin
-- 密码：123（具体请查看数据库 hr 表）
+- Username: admin
+- Password: 123 (Please check the `hr` table in the database for specifics)
 
-### 11.3 功能测试清单
+### 11.3 Feature Test Checklist
 
-- [ ] 用户登录
-- [ ] 员工信息管理
-- [ ] 部门管理
-- [ ] 薪资管理
-- [ ] 系统设置
-- [ ] 在线聊天（WebSocket）
-- [ ] 邮件发送（RabbitMQ + mailserver）
-- [ ] 文件上传（FastDFS）
-- [ ] Excel 导入导出
+- [ ] User login
+- [ ] Employee information management
+- [ ] Department management
+- [ ] Salary management
+- [ ] System settings
+- [ ] Online chat (WebSocket)
+- [ ] Email sending (RabbitMQ + mailserver)
+- [ ] File upload (FastDFS)
+- [ ] Excel import/export
 
 ---
 
-## 12. 常见问题
+## 12. Common Problems
 
-### 12.1 数据库连接失败
+### 12.1 Database Connection Failure
 
-**问题：** `Communications link failure`
+**Problem:** `Communications link failure`
 
-**解决方案：**
+**Solution:**
 
-1. 检查 MySQL 服务是否启动
-2. 检查数据库连接配置（用户名、密码、URL）
-3. 检查防火墙是否开放 3306 端口
-4. 检查 MySQL 是否允许远程连接
+1. Check if MySQL service is running.
+2. Check database connection configuration (username, password, URL).
+3. Check if firewall has port 3306 open.
+4. Check if MySQL allows remote connections.
 
 ```sql
--- 允许远程连接
+-- Allow remote connections
 GRANT ALL PRIVILEGES ON vhr.* TO 'root'@'%' IDENTIFIED BY 'your_password';
 FLUSH PRIVILEGES;
 ```
 
-### 12.2 Redis 连接失败
+### 12.2 Redis Connection Failure
 
-**问题：** `Could not get a resource from the pool`
+**Problem:** `Could not get a resource from the pool`
 
-**解决方案：**
+**Solution:**
 
-1. 检查 Redis 服务是否启动
-2. 检查 Redis 配置（host、port、password）
-3. 测试 Redis 连接：`redis-cli -h host -p port -a password ping`
+1. Check if Redis service is running.
+2. Check Redis configuration (host, port, password).
+3. Test Redis connection: `redis-cli -h host -p port -a password ping`.
 
-### 12.3 RabbitMQ 连接失败
+### 12.3 RabbitMQ Connection Failure
 
-**问题：** `Failed to connect to RabbitMQ`
+**Problem:** `Failed to connect to RabbitMQ`
 
-**解决方案：**
+**Solution:**
 
-1. 检查 RabbitMQ 服务是否启动
-2. 检查 RabbitMQ 用户权限
-3. 访问管理界面检查：http://localhost:15672
+1. Check if RabbitMQ service is running.
+2. Check RabbitMQ user permissions.
+3. Access management interface: http://localhost:15672.
 
 ```bash
-# 创建用户并授权
+# Create user and grant permissions
 rabbitmqctl add_user vhr_user password
 rabbitmqctl set_user_tags vhr_user administrator
 rabbitmqctl set_permissions -p / vhr_user ".*" ".*" ".*"
 ```
 
-### 12.4 前端无法访问后端 API
+### 12.4 Frontend Cannot Access Backend API
 
-**问题：** 跨域错误 `CORS`
+**Problem:** Cross-origin error `CORS`
 
-**解决方案：**
+**Solution:**
 
-1. 使用 Nginx 反向代理（推荐）
-2. 或在后端添加 CORS 配置：
+1. Use Nginx as a reverse proxy (recommended).
+2. Or add CORS configuration in the backend:
 
 ```java
 @Configuration
@@ -866,35 +866,35 @@ public class CorsConfig implements WebMvcConfigurer {
 }
 ```
 
-### 12.5 WebSocket 连接失败
+### 12.5 WebSocket Connection Failure
 
-**问题：** 在线聊天无法连接
+**Problem:** Online chat cannot connect.
 
-**解决方案：**
+**Solution:**
 
-1. 检查 Nginx WebSocket 代理配置
-2. 检查前端 WebSocket 连接地址
-3. 检查后端 WebSocket 配置
+1. Check Nginx WebSocket proxy configuration.
+2. Check frontend WebSocket connection address.
+3. Check backend WebSocket configuration.
 
 ---
 
-## 13. 性能优化建议
+## 13. Performance Optimization Suggestions
 
-### 13.1 数据库优化
+### 13.1 Database Optimization
 
 ```sql
--- 创建索引
+-- Create index
 CREATE INDEX idx_employee_name ON employee(name);
 CREATE INDEX idx_employee_department ON employee(department_id);
 
--- 配置文件优化（my.cnf）
+-- Configuration file optimization (my.cnf)
 [mysqld]
 innodb_buffer_pool_size = 1G
 innodb_log_file_size = 256M
 max_connections = 1000
 ```
 
-### 13.2 Redis 优化
+### 13.2 Redis Optimization
 
 ```conf
 # redis.conf
@@ -902,14 +902,14 @@ maxmemory 2gb
 maxmemory-policy allkeys-lru
 ```
 
-### 13.3 JVM 优化
+### 13.3 JVM Optimization
 
 ```bash
-# 启动参数
+# Startup parameters
 java -Xms1g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -jar vhr-web.jar
 ```
 
-### 13.4 Nginx 优化
+### 13.4 Nginx Optimization
 
 ```nginx
 # nginx.conf
@@ -924,62 +924,62 @@ http {
 
 ---
 
-## 14. 安全建议
+## 14. Security Recommendations
 
-1. **修改默认密码**：修改数据库、Redis、RabbitMQ 默认密码
-2. **使用 HTTPS**：生产环境强制使用 HTTPS
-3. **防火墙配置**：只开放必要端口（80, 443, 3306）
-4. **定期备份**：配置数据库定时备份
-5. **日志监控**：配置应用日志监控和告警
-6. **安全扫描**：定期进行安全漏洞扫描
+1. **Change Default Passwords**: Modify default passwords for MySQL, Redis, RabbitMQ.
+2. **Use HTTPS**: Enforce HTTPS in production environments.
+3. **Firewall Configuration**: Only open necessary ports (80, 443, 3306).
+4. **Regular Backups**: Configure scheduled database backups.
+5. **Log Monitoring**: Configure application log monitoring and alerts.
+6. **Security Scanning**: Conduct regular security vulnerability scans.
 
 ---
 
-## 15. 附录
+## 15. Appendix
 
-### 15.1 目录结构
+### 15.1 Directory Structure
 
 ```
 /opt/vhr/
-├── vhr/                    # 源代码
-│   ├── vhr/               # 后端代码
+├── vhr/                    # Source code
+│   ├── vhr/               # Backend code
 │   │   ├── vhrserver/
 │   │   └── mailserver/
-│   └── vuehr/             # 前端代码
-├── dist/                   # 前端构建产物
-├── logs/                   # 日志目录
+│   └── vuehr/             # Frontend code
+├── dist/                   # Frontend build artifacts
+├── logs/                   # Log directory
 │   ├── vhr-web.log
 │   └── mailserver.log
-└── backups/               # 备份目录
+└── backups/               # Backup directory
 ```
 
-### 15.2 常用命令
+### 15.2 Common Commands
 
 ```bash
-# 查看日志
+# View logs
 tail -f /opt/vhr/logs/vhr-web.log
 
-# 重启服务
+# Restart service
 sudo systemctl restart vhr-web
 
-# 查看进程
+# View processes
 ps aux | grep vhr
 
-# 查看端口
+# View ports
 netstat -an | grep 8081
 
-# 数据库备份
+# Database backup
 mysqldump -u root -p vhr > backup_$(date +%Y%m%d).sql
 ```
 
-### 15.3 技术支持
+### 15.3 Technical Support
 
-如遇到问题，请参考：
+For issues, please refer to:
 
-- 项目 GitHub：https://github.com/lenve/vhr
-- Spring Boot 文档：https://spring.io/projects/spring-boot
-- Vue.js 文档：https://vuejs.org/
+- Project GitHub: https://github.com/lenve/vhr
+- Spring Boot Documentation: https://spring.io/projects/spring-boot
+- Vue.js Documentation: https://vuejs.org/
 
 ---
 
-*文档编写完成，祝部署顺利！*
+*Document written, happy deployment!*
