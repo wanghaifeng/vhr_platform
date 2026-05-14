@@ -15,6 +15,16 @@ pipeline:
             steps:
               - step:
                   type: Run
+                  name: Secret Scanning
+                  identifier: Secret_Scanning
+                  spec:
+                    connectorRef: account.DockerHub
+                    image: zricethezav/gitleaks:latest
+                    shell: Sh
+                    command: |-
+                      gitleaks detect --source . -v
+              - step:
+                  type: Run
                   name: Build Backend
                   identifier: Build_Backend
                   spec:
