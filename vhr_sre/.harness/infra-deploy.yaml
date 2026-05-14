@@ -4,11 +4,23 @@ pipeline:
   projectIdentifier: Default
   orgIdentifier: default
   tags: {}
+  variables:
+    - name: environment
+      type: String
+      required: true
+      enum:
+        - dev
+        - test
+        - staging
+        - perf
+        - prod
+      default: dev
+
   stages:
     - stage:
         name: Terraform Plan and Apply
         identifier: Terraform_Plan_and_Apply
-        description: ""
+        description: "Deploy Terraform infrastructure to <+pipeline.variables.environment> environment."
         type: Custom
         spec:
           execution:
@@ -23,7 +35,7 @@ pipeline:
                     shell: Sh
                     command: |-
                       cd vhr_sre/infrastructure
-                      terraform init
+                      terraform -chdir=environments/<+pipeline.variables.environment> init
               - step:
                   type: Run
                   name: Terraform Plan
@@ -34,13 +46,15 @@ pipeline:
                     shell: Sh
                     command: |-
                       cd vhr_sre/infrastructure
-                      terraform plan -out=tfplan
+                      terraform -chdir=environments/<+pipeline.variables.environment> plan -out=tfplan \
+                        -var="mysql_root_password=<+secrets.getValue("mysql_root_password")>" \
+                        -var="redis_password=<+secrets.getValue("redis_password")>"
               - step:
                   type: HarnessApproval
                   name: Approval
                   identifier: Approval
                   spec:
-                    approvalMessage: Please review the terraform plan before applying.
+                    approvalMessage: Please review the terraform plan before applying to <+pipeline.variables.environment>.
                     includePipelineExecutionHistory: true
                     approvers:
                       userGroups:
@@ -58,5 +72,5 @@ pipeline:
                     shell: Sh
                     command: |-
                       cd vhr_sre/infrastructure
-                      terraform apply -auto-approve tfplan
+                      terraform -chdir=environments/<+pipeline.variables.environment> apply -auto-approve tfplan
         tags: {}
