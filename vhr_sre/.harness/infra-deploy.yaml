@@ -35,6 +35,8 @@ pipeline:
                     shell: Sh
                     command: |-
                       cd vhr_sre/infrastructure
+                      export ALICLOUD_ACCESS_KEY=<+secrets.getValue("alicloud_access_key")>
+                      export ALICLOUD_SECRET_KEY=<+secrets.getValue("alicloud_secret_key")>
                       terraform -chdir=environments/<+pipeline.variables.environment> init
               - step:
                   type: Run
@@ -46,6 +48,8 @@ pipeline:
                     shell: Sh
                     command: |-
                       cd vhr_sre/infrastructure
+                      export ALICLOUD_ACCESS_KEY=<+secrets.getValue("alicloud_access_key")>
+                      export ALICLOUD_SECRET_KEY=<+secrets.getValue("alicloud_secret_key")>
                       terraform -chdir=environments/<+pipeline.variables.environment> plan -out=tfplan \
                         -var="mysql_root_password=<+secrets.getValue("mysql_root_password")>" \
                         -var="redis_password=<+secrets.getValue("redis_password")>"
@@ -72,5 +76,7 @@ pipeline:
                     shell: Sh
                     command: |-
                       cd vhr_sre/infrastructure
+                      export ALICLOUD_ACCESS_KEY=<+secrets.getValue("alicloud_access_key")>
+                      export ALICLOUD_SECRET_KEY=<+secrets.getValue("alicloud_secret_key")>
                       terraform -chdir=environments/<+pipeline.variables.environment> apply -auto-approve tfplan
         tags: {}
