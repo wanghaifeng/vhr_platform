@@ -1,0 +1,48 @@
+name: VHR Service CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - 'vhr/**'
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - 'vhr/**'
+
+jobs:
+  build-backend:
+    name: Build Spring Boot Backend
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+      working-directory: vhr/vhr/vhrserver
+
+  build-frontend:
+    name: Build Vue Frontend
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        cache: 'npm'
+        cache-dependency-path: vhr/vuehr/package-lock.json
+
+    - name: Install dependencies and build
+      run: |
+        npm install
+        npm run build
+      working-directory: vhr/vuehr
