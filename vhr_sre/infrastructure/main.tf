@@ -1,5 +1,5 @@
 provider "alicloud" {
-  region  = var.region
+  region = var.region
 }
 
 resource "alicloud_log_project" "vhr_log_project" {
@@ -8,20 +8,20 @@ resource "alicloud_log_project" "vhr_log_project" {
 }
 
 resource "alicloud_log_store" "vhr_access_log_store" {
-  project              = alicloud_log_project.vhr_log_project.name
-  name                 = "vhr-access-logstore"
-  retention_period     = 30
-  shard_count          = 2
-  auto_split           = true
+  project               = alicloud_log_project.vhr_log_project.name
+  name                  = "vhr-access-logstore"
+  retention_period      = 30
+  shard_count           = 2
+  auto_split            = true
   max_split_shard_count = 60
 }
 
 resource "alicloud_log_store" "vhr_error_log_store" {
-  project              = alicloud_log_project.vhr_log_project.name
-  name                 = "vhr-error-logstore"
-  retention_period     = 30
-  shard_count          = 2
-  auto_split           = true
+  project               = alicloud_log_project.vhr_log_project.name
+  name                  = "vhr-error-logstore"
+  retention_period      = 30
+  shard_count           = 2
+  auto_split            = true
   max_split_shard_count = 60
 }
 
