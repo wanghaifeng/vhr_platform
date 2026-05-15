@@ -1,0 +1,123 @@
+# VHR Production Environment - Hybrid Architecture (Frontend K8s + Backend ECS)
+
+provider "alicloud" {
+  region = var.region
+}
+
+# VPC (保持不变)
+module "vpc" {
+  source      = "../../modules/alicloud_vpc"
+  environment = var.environment
+  vpc_name    = "${var.project_name}-${var.environment}"
+  cidr_block  = "10.16.0.0/16"
+  
+  frontend_cidr = "10.16.1.0/24"  # K8s 节点
+  backend_cidr  = "10.16.2.0/24"  # Backend ECS
+  db_cidr       = "10.16.3.0/24"  # RDS/Redis
+
+  allowed_db_ports = ["3306", "6379"]
+}
+
+# Kubernetes Cluster (新增 - Frontend)
+module "ack" {
+  source = "../../modules/alicloud_ack"
+  
+  cluster_name      = "${var.project_name}-${var.environment}"
+  vswitch_ids       = [module.vpc.frontend_vswitch_id]
+  dr_vswitch_ids    = [module.vpc.db_vswitch_id]  # 备集群使用不同可用区
+  security_group_id = module.vpc.web_security_group_id
+  
+  k8s_version    = "1.24"
+  node_count     = 3
+  min_node_count = 2
+  max_node_count = 10
+  
+  node_instance_types = ["ecs.c6.large", "ecs.c6.xlarge"]
+  enable_autoscaling  = true
+  enable_dr           = true  # 启用容灾
+  
+  tags = {
+    environment = var.environment
+    project     = var.project_name
+  }
+}
+
+# Backend ECS (保留 - 仅后端)
+module "ecs" {
+  source      = "../../modules/alicloud_ecs"
+  environment = var.environment
+  image_id    = var.ecs_image_id
+  
+  # 仅创建后端 ECS，前端由 K8s 管理
+  instance_type = {
+    frontend = "ecs.c6.large"  # 保留最小配置作为备用
+    backend  = "ecs.c6.2xlarge"
+  }
+  instance_counts = {
+    frontend = 0  # 前端迁移到 K8s，减少 ECS
+    backend  = 4   # 后端保持不变
+  }
+  
+  frontend_vswitch_id       = module.vpc.frontend_vswitch_id
+  backend_vswitch_id        = module.vpc.backend_vswitch_id
+  frontend_security_group_id = module.vpc.web_security_group_id
+  backend_security_group_id  = module.vpc.backend_security_group_id
+}
+
+# RDS (保持不变)
+module "rds" {
+  source            = "../../modules/alicloud_rds"
+  environment       = var.environment
+  vpc_id            = module.vpc.vpc_id
+  db_vswitch_id     = module.vpc.db_vswitch_id
+  availability_zone = module.vpc.availability_zone
+  security_ip_list  = [module.vpc.backend_cidr, "10.16.1.0/24"]  # 添加 K8s Pod 网段
+  mysql_instance_type = "rds.mysql.s4.large"
+  mysql_instance_storage = 200
+  mysql_root_password = var.mysql_root_password
+}
+
+# Redis (保持不变)
+module "kvstore" {
+  source            = "../../modules/alicloud_kvstore"
+  environment       = var.environment
+  vpc_id            = module.vpc.vpc_id
+  db_vswitch_id     = module.vpc.db_vswitch_id
+  availability_zone = module.vpc.availability_zone
+  security_ip_list  = [module.vpc.backend_cidr, "10.16.1.0/24"]  # 添加 K8s Pod 网段
+  redis_instance_type = "Redis"
+  redis_instance_storage = 200
+  redis_password    = var.redis_password
+}
+
+# OSS (保持不变)
+module "oss" {
+  source            = "../../modules/alicloud_oss"
+  environment       = var.environment
+  oss_allowed_origins = var.oss_allowed_origins
+}
+
+# SLB (调整 - 指向 K8s Ingress)
+# 注意: K8s Ingress Controller 会创建自己的 SLB
+# 此 SLB 作为备用或指向后端 ECS
+module "slb" {
+  source              = "../../modules/alicloud_slb"
+  environment         = var.environment
+  vswitch_id          = module.vpc.frontend_vswitch_id
+  backend_server_ids  = module.ecs.backend_instance_ids  # 仅指向后端
+  backend_port        = 8080
+  slb_spec            = "slb.s2.large"  # 降低规格，主要流量走 K8s Ingress
+  address_type        = "internet"
+  health_check_uri    = "/actuator/health"
+  enable_sticky_session = true
+  enable_https        = true
+  ssl_certificate_id  = var.ssl_certificate_id
+}
+
+# Container Registry (共享)
+module "acr" {
+  source        = "../../modules/alicloud_acr"
+  namespace_name = var.project_name
+  visibility    = "PRIVATE"
+  region        = var.region
+}

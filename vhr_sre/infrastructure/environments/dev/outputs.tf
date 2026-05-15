@@ -37,3 +37,25 @@ output "slb_id" {
   description = "The ID of the SLB instance"
   value       = module.slb.slb_id
 }
+
+# Kubernetes outputs
+output "k8s_cluster_id" {
+  description = "Kubernetes cluster ID"
+  value       = module.ack.primary_cluster_id
+}
+
+output "k8s_cluster_endpoint" {
+  description = "Kubernetes cluster API endpoint"
+  value       = module.ack.primary_cluster_endpoint
+}
+
+# Container Registry outputs
+output "acr_registry_endpoint" {
+  description = "Container registry endpoint"
+  value       = module.acr.registry_endpoint
+}
+
+output "acr_frontend_repo_url" {
+  description = "Frontend container image URL"
+  value       = module.acr.frontend_repo_url
+}

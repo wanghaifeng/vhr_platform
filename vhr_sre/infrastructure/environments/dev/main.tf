@@ -71,13 +71,37 @@ module "slb" {
   source              = "../../modules/alicloud_slb"
   environment         = var.environment
   vswitch_id          = module.vpc.frontend_vswitch_id
-  backend_server_ids  = module.ecs.frontend_instance_ids
+  backend_server_ids  = module.ecs.backend_instance_ids
   backend_port        = 8080
   slb_spec            = "slb.s1.small"
   address_type        = "internet"
   health_check_uri    = "/actuator/health"
   enable_sticky_session = true
   enable_https        = false
+}
+
+# Kubernetes Cluster (Frontend) - Dev 环境
+module "ack" {
+  source = "../../modules/alicloud_ack"
+  
+  cluster_name      = "${var.project_name}-${var.environment}"
+  vswitch_ids       = [module.vpc.frontend_vswitch_id]
+  dr_vswitch_ids    = []
+  security_group_id = module.vpc.web_security_group_id
+  
+  k8s_version    = "1.24"
+  node_count     = 1
+  min_node_count = 1
+  max_node_count = 3
+  
+  node_instance_types = ["ecs.c6.large"]
+  enable_autoscaling  = true
+  enable_dr           = false  # Dev 环境不需要容灾
+  
+  tags = {
+    environment = var.environment
+    project     = var.project_name
+  }
 }
 
 # Container Registry (shared across all environments)

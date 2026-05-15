@@ -1,0 +1,151 @@
+name: VHR Frontend Container CI/CD
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - 'vhr/vuehr/**'
+      - 'container/frontend/**'
+  pull_request:
+    branches: [ "main", "master" ]
+    paths:
+      - 'vhr/vuehr/**'
+      - 'container/frontend/**'
+
+env:
+  REGISTRY: registry.cn-beijing.aliyuncs.com
+  IMAGE_NAME: vhr/frontend
+
+jobs:
+  # Code scanning
+  code-scan:
+    name: Code Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'vhr/vuehr'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
+
+  # Build and push image
+  build-push:
+    name: Build and Push Image
+    runs-on: ubuntu-latest
+    needs: [code-scan]
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Alibaba Cloud Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.ALIBABA_CLOUD_USERNAME }}
+        password: ${{ secrets.ALIBABA_CLOUD_PASSWORD }}
+
+    - name: Extract metadata for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix=sha-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./vhr/vuehr
+        file: ./container/frontend/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Output image digest
+      run: echo ${{ steps.meta.outputs.digest }}
+
+  # Deploy to K8s (dev)
+  deploy-dev:
+    name: Deploy to K8s Dev
+    runs-on: ubuntu-latest
+    needs: [build-push]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: dev
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.KUBE_CONFIG_DEV }}" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+
+    - name: Deploy Frontend with Helm
+      run: |
+        helm upgrade --install vhr-frontend ./vhr_sre/helm/vhr-frontend \
+          -f ./vhr_sre/helm/vhr-frontend/values-dev.yaml \
+          --namespace vhr-dev \
+          --create-namespace \
+          --set image.tag=${{ github.sha }} \
+          --wait \
+          --timeout 5m
+
+  # Deploy to K8s (prod) with approval
+  deploy-prod:
+    name: Deploy to K8s Prod
+    runs-on: ubuntu-latest
+    needs: [deploy-dev]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    environment: prod
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+
+    - name: Deploy Frontend with Helm (Primary Cluster)
+      run: |
+        helm upgrade --install vhr-frontend ./vhr_sre/helm/vhr-frontend \
+          -f ./vhr_sre/helm/vhr-frontend/values-prod.yaml \
+          --namespace vhr-prod \
+          --set image.tag=${{ github.sha }} \
+          --wait \
+          --timeout 10m
+
+    - name: Deploy Frontend with Helm (Secondary Cluster - DR)
+      run: |
+        echo "${{ secrets.KUBE_CONFIG_PROD_DR }}" | base64 -d > kubeconfig-dr
+        export KUBECONFIG=kubeconfig-dr
+        
+        helm upgrade --install vhr-frontend ./vhr_sre/helm/vhr-frontend \
+          -f ./vhr_sre/helm/vhr-frontend/values-prod.yaml \
+          --namespace vhr-prod \
+          --set image.tag=${{ github.sha }} \
+          --wait \
+          --timeout 10m

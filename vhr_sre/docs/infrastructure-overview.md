@@ -21,6 +21,14 @@
 | **Redis KVStore** | alicloud_kvstore_instance | Redis (10GB) | Redis (10GB) | Redis (50GB) | Redis (100GB) | Redis (200GB) |
 | **OSS Bucket** | alicloud_oss_bucket | dev-vhr-app-storage | test-vhr-app-storage | staging-vhr-app-storage | perf-vhr-app-storage | prod-vhr-app-storage |
 | **Load Balancer (SLB)** | alicloud_slb_load_balancer | slb.s1.small (HTTP) | slb.s2.small (HTTP) | slb.s2.medium (HTTPS) | slb.s3.medium (HTTP) | slb.s3.large (HTTPS) |
+| **Container Registry (ACR)** | alicloud_cr_namespace | vhr (shared) | vhr (shared) | vhr (shared) | vhr (shared) | vhr (shared) |
+| **Frontend Image Repo** | alicloud_cr_repo | vhr/frontend | vhr/frontend | vhr/frontend | vhr/frontend | vhr/frontend |
+| **Backend Image Repo** | alicloud_cr_repo | vhr/backend | vhr/backend | vhr/backend | vhr/backend | vhr/backend |
+| **Kubernetes Cluster** | alicloud_cs_managed_kubernetes | vhr-dev (1 node) | vhr-test (2 nodes) | vhr-staging (3 nodes) | vhr-perf (3 nodes) | vhr-prod (3 nodes, DR) |
+| **K8s Service CIDR** | - | 172.19.0.0/20 | 172.19.0.0/20 | 172.19.0.0/20 | 172.19.0.0/20 | 172.19.0.0/20 |
+| **K8s Pod CIDR** | - | 10.99.0.0/16 | 10.99.0.0/16 | 10.99.0.0/16 | 10.99.0.0/16 | 10.99.0.0/16 |
+| **Ingress Controller** | NGINX Ingress | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Helm Charts** | Helm 3 | vhr-frontend | vhr-frontend | vhr-frontend | vhr-frontend | vhr-frontend |
 | **Terraform State** | OSS Backend | vhr-terraform-state-dev | vhr-terraform-state-test | vhr-terraform-state-staging | vhr-terraform-state-perf | vhr-terraform-state-prod |
 
 ### Component Details
@@ -41,6 +49,14 @@
 | **Load Balancing** | SLB Load Balancer | Server Load Balancer for traffic distribution | `alicloud_slb_load_balancer` |
 | | SLB Listener | Listener for HTTP/HTTPS traffic | `alicloud_slb_listener` |
 | | SLB Backend Server | Backend ECS instances attachment | `alicloud_slb_backend_server` |
+| **Container** | ACR Namespace | Container Registry namespace for images | `alicloud_cr_namespace` |
+| | ACR Repository | Container image repository | `alicloud_cr_repo` |
+| **Kubernetes** | ACK Cluster | Managed Kubernetes cluster | `alicloud_cs_managed_kubernetes` |
+| | ACK Node Pool | Worker node pool with autoscaling | `alicloud_cs_kubernetes_node_pool` |
+| | Helm Chart | Package manager for K8s deployments | Helm 3 |
+| | Ingress Controller | HTTP(S) routing and load balancing | NGINX Ingress |
+| **Monitoring** | Prometheus | Metrics collection and alerting | kube-prometheus-stack |
+| | Grafana | Visualization dashboards | kube-prometheus-stack |
 
 ### Security Group Rules
 

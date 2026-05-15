@@ -1,0 +1,9 @@
+apiVersion: v2
+name: vhr-monitoring
+description: VHR Monitoring Stack (Prometheus + Grafana)
+type: application
+version: 0.1.0
+dependencies:
+  - name: kube-prometheus-stack
+    version: "45.0.0"
+    repository: "https://prometheus-community.github.io/helm-charts"
