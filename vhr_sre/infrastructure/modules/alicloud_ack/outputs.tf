@@ -11,7 +11,7 @@ output "primary_cluster_name" {
 
 output "primary_cluster_endpoint" {
   description = "Primary cluster API endpoint"
-  value       = alicloud_cs_managed_kubernetes.primary.connections[0].api_server_internet_endpoint
+  value       = alicloud_cs_managed_kubernetes.primary.connections.api_server_internet_endpoint
 }
 
 output "primary_cluster_version" {
@@ -21,7 +21,7 @@ output "primary_cluster_version" {
 
 output "primary_worker_role_arn" {
   description = "Primary cluster worker role ARN"
-  value       = alicloud_cs_managed_kubernetes.primary.worker_role
+  value       = alicloud_cs_managed_kubernetes.primary.worker_ram_role_name
 }
 
 output "primary_security_group_id" {
@@ -42,7 +42,7 @@ output "secondary_cluster_name" {
 
 output "secondary_cluster_endpoint" {
   description = "Secondary cluster API endpoint (DR)"
-  value       = var.enable_dr ? alicloud_cs_managed_kubernetes.secondary[0].connections[0].api_server_internet_endpoint : ""
+  value       = var.enable_dr ? alicloud_cs_managed_kubernetes.secondary[0].connections.api_server_internet_endpoint : ""
 }
 
 output "secondary_cluster_version" {
@@ -74,14 +74,14 @@ output "clusters" {
     primary = {
       id        = alicloud_cs_managed_kubernetes.primary.id
       name      = alicloud_cs_managed_kubernetes.primary.name
-      endpoint  = alicloud_cs_managed_kubernetes.primary.connections[0].api_server_internet_endpoint
+      endpoint  = alicloud_cs_managed_kubernetes.primary.connections.api_server_internet_endpoint
       version   = alicloud_cs_managed_kubernetes.primary.version
       node_pool = alicloud_cs_kubernetes_node_pool.primary_workers.id
     }
     secondary = var.enable_dr ? {
       id        = alicloud_cs_managed_kubernetes.secondary[0].id
       name      = alicloud_cs_managed_kubernetes.secondary[0].name
-      endpoint  = alicloud_cs_managed_kubernetes.secondary[0].connections[0].api_server_internet_endpoint
+      endpoint  = alicloud_cs_managed_kubernetes.secondary[0].connections.api_server_internet_endpoint
       version   = alicloud_cs_managed_kubernetes.secondary[0].version
       node_pool = alicloud_cs_kubernetes_node_pool.secondary_workers[0].id
     } : null
