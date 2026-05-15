@@ -1,0 +1,23 @@
+# Test environment values
+replicaCount: 1
+
+image:
+  tag: "test"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+ingress:
+  hosts:
+    - host: vhr-test.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+autoscaling:
+  enabled: false

@@ -1,0 +1,23 @@
+# Dev environment values
+replicaCount: 1
+
+image:
+  tag: "dev"
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+ingress:
+  hosts:
+    - host: vhr-dev.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+autoscaling:
+  enabled: false

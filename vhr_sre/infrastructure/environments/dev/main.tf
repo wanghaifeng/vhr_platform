@@ -79,3 +79,11 @@ module "slb" {
   enable_sticky_session = true
   enable_https        = false
 }
+
+# Container Registry (shared across all environments)
+module "acr" {
+  source        = "../../modules/alicloud_acr"
+  namespace_name = var.project_name
+  visibility    = "PRIVATE"
+  region        = var.region
+}
