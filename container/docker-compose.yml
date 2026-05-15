@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ../../vhr/vuehr
+      dockerfile: ../../container/frontend/Dockerfile
+    container_name: vhr-frontend
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - vhr-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Backend service (placeholder for now)
+  # backend-service:
+  #   build:
+  #     context: ../../vhr/vhrserver
+  #     dockerfile: ../../container/backend/Dockerfile
+  #   container_name: vhr-backend
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - vhr-network
+  #   restart: unless-stopped
+
+networks:
+  vhr-network:
+    driver: bridge
+
+volumes:
+  frontend-dist:
