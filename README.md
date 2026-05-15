@@ -325,7 +325,7 @@ kubectl port-forward svc/vhr-frontend 8080:80 -n vhr-dev
 ## 📁 Project Structure
 
 ```
-dxyy/
+vhr-platform/
 ├── vhr/                      # Application code (master branch)
 │   ├── frontend/            # Frontend source
 │   └── backend/             # Backend source
