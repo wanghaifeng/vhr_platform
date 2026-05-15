@@ -1,55 +1,55 @@
-# Frontend 迁移到 Kubernetes 指南
+# Frontend Migration to Kubernetes Guide
 
-## 架构变化
+## Architecture Changes
 
-### 迁移前
-| 组件 | 位置 | 数量 | 说明 |
-|------|------|------|------|
+### Before Migration
+| Component | Location | Count | Description |
+|-----------|----------|-------|-------------|
 | Frontend | ECS | 2 × ecs.c6.2xlarge | Nginx + Vue.js |
 | Backend | ECS | 4 × ecs.c6.2xlarge | Spring Boot |
-| SLB | 独立 | slb.s3.large | 指向 Frontend ECS |
+| SLB | Standalone | slb.s3.large | Points to Frontend ECS |
 
-### 迁移后
-| 组件 | 位置 | 数量 | 说明 |
-|------|------|------|------|
-| Frontend | K8s Pod | 3+ Pods | Nginx 容器 |
-| Backend | ECS | 4 × ecs.c6.2xlarge | 保持不变 |
-| Ingress | K8s Ingress | 自动 SLB | K8s 管理 |
-| 备用 SLB | 独立 | slb.s2.large | 指向 Backend ECS |
+### After Migration
+| Component | Location | Count | Description |
+|-----------|----------|-------|-------------|
+| Frontend | K8s Pod | 3+ Pods | Nginx container |
+| Backend | ECS | 4 × ecs.c6.2xlarge | Unchanged |
+| Ingress | K8s Ingress | Auto SLB | K8s managed |
+| Backup SLB | Standalone | slb.s2.large | Points to Backend ECS |
 
-## 成本对比
+## Cost Comparison
 
-| 项目 | 迁移前 | 迁移后 | 节省 |
-|------|--------|--------|------|
+| Item | Before | After | Savings |
+|------|--------|-------|---------|
 | Frontend ECS | 2 × ¥1,200 = ¥2,400 | 0 | ¥2,400 |
-| K8s 节点 | 0 | 3 × ¥600 = ¥1,800 | -¥1,800 |
-| 主 SLB | ¥300 (s3.large) | ¥150 (s2.large) | ¥150 |
+| K8s Nodes | 0 | 3 × ¥600 = ¥1,800 | -¥1,800 |
+| Main SLB | ¥300 (s3.large) | ¥150 (s2.large) | ¥150 |
 | Ingress SLB | 0 | ¥100 | -¥100 |
-| **月节省** | | | **¥650/月** |
+| **Monthly Savings** | | | **¥650/month** |
 
-## 迁移步骤
+## Migration Steps
 
-### 阶段 1: 准备阶段 (不影响生产)
+### Phase 1: Preparation (No Production Impact)
 
-#### 1.1 创建 K8s 集群
+#### 1.1 Create K8s Cluster
 ```bash
-# 应用 K8s 集群配置
+# Apply K8s cluster configuration
 cd vhr_sre/infrastructure/environments/prod
 terraform apply -target=module.ack
 ```
 
-#### 1.2 配置 kubectl
+#### 1.2 Configure kubectl
 ```bash
-# 获取集群凭证
+# Get cluster credentials
 aliyun cs GET /k8s/${cluster_id}/user_config > ~/.kube/config-prod
 
-# 验证连接
+# Verify connection
 kubectl get nodes --context=prod
 ```
 
-#### 1.3 安装 Ingress Controller
+#### 1.3 Install Ingress Controller
 ```bash
-# 安装 NGINX Ingress Controller
+# Install NGINX Ingress Controller
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace ingress-nginx \
@@ -57,9 +57,9 @@ helm install ingress-nginx ingress-nginx/ingress-nginx \
   --set controller.service.annotations."service\.beta\.kubernetes\.io/alibaba-cloud-loadbalancer-spec"="slb.s3.large"
 ```
 
-#### 1.4 配置容器镜像仓库凭证
+#### 1.4 Configure Container Registry Credentials
 ```bash
-# 创建 Docker Registry Secret
+# Create Docker Registry Secret
 kubectl create secret docker-registry aliyun-registry \
   --docker-server=registry.cn-beijing.aliyuncs.com \
   --docker-username=${ALIBABA_CLOUD_USERNAME} \
@@ -67,127 +67,127 @@ kubectl create secret docker-registry aliyun-registry \
   --namespace vhr-prod
 ```
 
-### 阶段 2: 测试部署 (非生产流量)
+### Phase 2: Test Deployment (Non-Production Traffic)
 
-#### 2.1 部署 Frontend 到 K8s
+#### 2.1 Deploy Frontend to K8s
 ```bash
-# 部署到测试命名空间
+# Deploy to test namespace
 helm install vhr-frontend-test ./vhr_sre/helm/vhr-frontend \
   -f ./vhr_sre/helm/vhr-frontend/values-prod.yaml \
   --namespace vhr-test \
   --create-namespace
 ```
 
-#### 2.2 验证部署
+#### 2.2 Verify Deployment
 ```bash
-# 检查 Pod 状态
+# Check Pod status
 kubectl get pods -n vhr-test -l app.kubernetes.io/name=vhr-frontend
 
-# 检查 Service
+# Check Service
 kubectl get svc -n vhr-test
 
-# 检查 Ingress
+# Check Ingress
 kubectl get ingress -n vhr-test
 
-# 测试访问
+# Test access
 kubectl port-forward svc/vhr-frontend 8080:80 -n vhr-test
-# 访问 http://localhost:8080
+# Access http://localhost:8080
 ```
 
-#### 2.3 性能测试
+#### 2.3 Performance Testing
 ```bash
-# 压力测试
+# Load testing
 ab -n 10000 -c 100 http://vhr-frontend.test.example.com/
 ```
 
-### 阶段 3: 灰度切换 (逐步迁移流量)
+### Phase 3: Canary Traffic Migration (Gradual Traffic Shift)
 
-#### 3.1 DNS 灰度配置
+#### 3.1 DNS Canary Configuration
 ```
-# 阿里云 DNS 配置
+# Alibaba Cloud DNS configuration
 vhr.example.com:
-  - 记录1: ECS SLB IP (权重 90)  # 90% 流量
-  - 记录2: K8s Ingress IP (权重 10)  # 10% 流量
+  - Record1: ECS SLB IP (weight 90)  # 90% traffic
+  - Record2: K8s Ingress IP (weight 10)  # 10% traffic
 ```
 
-#### 3.2 监控切换
+#### 3.2 Monitor Migration
 ```bash
-# 监控 K8s Frontend 指标
+# Monitor K8s Frontend metrics
 kubectl top pods -n vhr-prod
 
-# 监控响应时间
-# Prometheus 查询
+# Monitor response time
+# Prometheus query
 avg(response_time_seconds{namespace="vhr-prod"})
 ```
 
-#### 3.3 逐步调整权重
+#### 3.3 Gradually Adjust Weights
 ```
-第1天: 90% ECS / 10% K8s
-第2天: 70% ECS / 30% K8s
-第3天: 50% ECS / 50% K8s
-第4天: 30% ECS / 70% K8s
-第5天: 10% ECS / 90% K8s
-第6天: 0% ECS / 100% K8s  # 完全切换
+Day 1: 90% ECS / 10% K8s
+Day 2: 70% ECS / 30% K8s
+Day 3: 50% ECS / 50% K8s
+Day 4: 30% ECS / 70% K8s
+Day 5: 10% ECS / 90% K8s
+Day 6: 0% ECS / 100% K8s  # Complete switch
 ```
 
-### 阶段 4: 完成迁移
+### Phase 4: Complete Migration
 
-#### 4.1 停止 ECS Frontend
+#### 4.1 Stop ECS Frontend
 ```bash
-# 更新 Terraform 配置
+# Update Terraform configuration
 # instance_counts.frontend = 0
 
 terraform apply -target=module.ecs
 ```
 
-#### 4.2 释放资源
+#### 4.2 Release Resources
 ```bash
-# 释放 Frontend ECS
+# Release Frontend ECS
 aliyun ecs StopInstance --instance-id ${frontend_instance_id}
 aliyun ecs DeleteInstance --instance-id ${frontend_instance_id}
 
-# 降低 SLB 规格
-# 更新 Terraform: slb_spec = "slb.s2.large"
+# Downgrade SLB spec
+# Update Terraform: slb_spec = "slb.s2.large"
 terraform apply -target=module.slb
 ```
 
-#### 4.3 更新文档
-- 更新架构图
-- 更新运维文档
-- 培训团队
+#### 4.3 Update Documentation
+- Update architecture diagrams
+- Update operations documentation
+- Train team
 
-## 验证清单
+## Verification Checklist
 
-### 功能验证
-- [ ] Frontend 页面正常访问
-- [ ] API 调用正常
-- [ ] 静态资源加载正常
-- [ ] 用户登录/注册正常
-- [ ] 所有功能测试通过
+### Functional Verification
+- [ ] Frontend pages accessible
+- [ ] API calls working
+- [ ] Static resources loading
+- [ ] User login/registration working
+- [ ] All functional tests passing
 
-### 性能验证
-- [ ] 响应时间 < 200ms
-- [ ] 错误率 < 0.1%
-- [ ] Pod 自动扩缩容正常
-- [ ] 负载均衡正常
+### Performance Verification
+- [ ] Response time < 200ms
+- [ ] Error rate < 0.1%
+- [ ] Pod auto-scaling working
+- [ ] Load balancing working
 
-### 容灾验证
-- [ ] K8s 节点故障自动恢复
-- [ ] Pod 故障自动重启
-- [ ] 备集群同步正常
-- [ ] 故障切换演练成功
+### Disaster Recovery Verification
+- [ ] K8s node failure auto-recovery
+- [ ] Pod failure auto-restart
+- [ ] Secondary cluster sync working
+- [ ] Failover drill successful
 
-### 监控告警
-- [ ] Prometheus 监控正常
-- [ ] Grafana 仪表盘正常
-- [ ] 告警规则生效
-- [ ] 日志采集正常
+### Monitoring & Alerting
+- [ ] Prometheus monitoring working
+- [ ] Grafana dashboards working
+- [ ] Alert rules active
+- [ ] Log collection working
 
-## 回滚方案
+## Rollback Plan
 
-### 快速回滚到 ECS
+### Quick Rollback to ECS
 ```bash
-# 1. 调整 DNS 权重
+# 1. Adjust DNS weights
 aliyun alidns UpdateDomainRecord \
   --RecordId ${k8s_record_id} \
   --Weight 0
@@ -196,36 +196,36 @@ aliyun alidns UpdateDomainRecord \
   --RecordId ${ecs_record_id} \
   --Weight 100
 
-# 2. 启动 ECS Frontend
+# 2. Start ECS Frontend
 terraform apply -target=module.ecs \
   -var='instance_counts={"frontend":2,"backend":4}'
 
-# 3. 验证
+# 3. Verify
 curl -I https://vhr.example.com
 ```
 
-### 回滚时间目标
-- DNS 切换: 30-60秒
-- ECS 启动: 2-3分钟
-- 总回滚时间: **< 5分钟**
+### Rollback Time Target
+- DNS switch: 30-60 seconds
+- ECS startup: 2-3 minutes
+- Total rollback time: **< 5 minutes**
 
-## 注意事项
+## Important Notes
 
-### 关键配置
-1. **K8s 资源限制**: 确保设置了合理的 requests/limits
-2. **健康检查**: 配置正确的 liveness/readiness probe
-3. **自动伸缩**: 配置 HPA 策略
-4. **日志**: 确保日志输出到 stdout/stderr
+### Key Configurations
+1. **K8s Resource Limits**: Ensure reasonable requests/limits are set
+2. **Health Checks**: Configure correct liveness/readiness probes
+3. **Auto-scaling**: Configure HPA policies
+4. **Logging**: Ensure logs output to stdout/stderr
 
-### 常见问题
-1. **镜像拉取失败**: 检查 imagePullSecrets 配置
-2. **Pod 无法启动**: 检查资源限制和节点资源
-3. **访问超时**: 检查 Ingress 和 Service 配置
-4. **配置错误**: 使用 ConfigMap 管理配置
+### Common Issues
+1. **Image pull failure**: Check imagePullSecrets configuration
+2. **Pod won't start**: Check resource limits and node resources
+3. **Access timeout**: Check Ingress and Service configuration
+4. **Configuration errors**: Use ConfigMap to manage configuration
 
-### 最佳实践
-1. ✅ 使用 Helm 管理部署
-2. ✅ 版本化所有配置
-3. ✅ 实施渐进式发布
-4. ✅ 保持回滚能力
-5. ✅ 持续监控和优化
+### Best Practices
+1. ✅ Use Helm for deployment management
+2. ✅ Version all configurations
+3. ✅ Implement gradual releases
+4. ✅ Maintain rollback capability
+5. ✅ Continuously monitor and optimize
