@@ -20,6 +20,7 @@
 | **MySQL RDS** | alicloud_db_instance | rds.mysql.c6.large (20GB) | rds.mysql.s1.small (10GB) | rds.mysql.s2.medium (50GB) | rds.mysql.s3.large (100GB) | rds.mysql.s4.large (200GB) |
 | **Redis KVStore** | alicloud_kvstore_instance | Redis (10GB) | Redis (10GB) | Redis (50GB) | Redis (100GB) | Redis (200GB) |
 | **OSS Bucket** | alicloud_oss_bucket | dev-vhr-app-storage | test-vhr-app-storage | staging-vhr-app-storage | perf-vhr-app-storage | prod-vhr-app-storage |
+| **Load Balancer (SLB)** | alicloud_slb_load_balancer | slb.s1.small (HTTP) | slb.s2.small (HTTP) | slb.s2.medium (HTTPS) | slb.s3.medium (HTTP) | slb.s3.large (HTTPS) |
 | **Terraform State** | OSS Backend | vhr-terraform-state-dev | vhr-terraform-state-test | vhr-terraform-state-staging | vhr-terraform-state-perf | vhr-terraform-state-prod |
 
 ### Component Details
@@ -37,6 +38,9 @@
 | **Cache** | KVStore Redis | Managed Redis instance | `alicloud_kvstore_instance` |
 | **Storage** | OSS Bucket | Object Storage Service | `alicloud_oss_bucket` |
 | | OSS Bucket ACL | Access control configuration | `alicloud_oss_bucket_acl` |
+| **Load Balancing** | SLB Load Balancer | Server Load Balancer for traffic distribution | `alicloud_slb_load_balancer` |
+| | SLB Listener | Listener for HTTP/HTTPS traffic | `alicloud_slb_listener` |
+| | SLB Backend Server | Backend ECS instances attachment | `alicloud_slb_backend_server` |
 
 ### Security Group Rules
 

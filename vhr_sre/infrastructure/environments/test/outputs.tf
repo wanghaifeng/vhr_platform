@@ -27,3 +27,13 @@ output "oss_bucket_name" {
   description = "The name of the OSS bucket"
   value       = module.oss.oss_bucket_name
 }
+
+output "slb_ip_address" {
+  description = "The IP address of the SLB"
+  value       = module.slb.slb_ip_address
+}
+
+output "slb_id" {
+  description = "The ID of the SLB instance"
+  value       = module.slb.slb_id
+}

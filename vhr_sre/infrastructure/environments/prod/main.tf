@@ -62,3 +62,17 @@ module "oss" {
   environment       = var.environment
   oss_allowed_origins = var.oss_allowed_origins
 }
+
+module "slb" {
+  source              = "../../modules/alicloud_slb"
+  environment         = var.environment
+  vswitch_id          = module.vpc.frontend_vswitch_id
+  backend_server_ids  = module.ecs.frontend_instance_ids
+  backend_port        = 8080
+  slb_spec            = "slb.s3.large"
+  address_type        = "internet"
+  health_check_uri    = "/actuator/health"
+  enable_sticky_session = true
+  enable_https        = true
+  ssl_certificate_id  = var.ssl_certificate_id
+}

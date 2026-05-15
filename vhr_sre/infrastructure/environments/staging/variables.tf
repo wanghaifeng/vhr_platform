@@ -41,3 +41,9 @@ variable "oss_allowed_origins" {
   type        = list(string)
   default     = ["*"]
 }
+
+variable "ssl_certificate_id" {
+  description = "SSL certificate ID for HTTPS listener"
+  type        = string
+  default     = ""
+}
