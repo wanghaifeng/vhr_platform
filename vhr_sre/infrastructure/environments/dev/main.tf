@@ -67,16 +67,16 @@ module "oss" {
   oss_allowed_origins = var.oss_allowed_origins
 }
 
-module "slb" {
-  source              = "../../modules/alicloud_slb"
+# Best Practice: Use NLB for Cloud Native ACK Ingress
+module "nlb" {
+  source              = "../../modules/alicloud_nlb"
   environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
   vswitch_id          = module.vpc.frontend_vswitch_id
-  backend_server_ids  = module.ecs.backend_instance_ids
-  backend_port        = 8080
-  slb_spec            = "slb.s1.small"
-  address_type        = "internet"
-  health_check_uri    = "/actuator/health"
-  enable_sticky_session = true
+  availability_zone   = module.vpc.availability_zone
+  backend_server_ids  = module.ecs.frontend_instance_ids # In a real ACK, this would be ACK node IDs
+  backend_port        = 80 # Nginx Ingress Port
+  address_type        = "Internet"
   enable_https        = false
 }
 

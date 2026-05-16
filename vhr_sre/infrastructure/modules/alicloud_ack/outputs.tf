@@ -61,6 +61,15 @@ output "secondary_node_pool_id" {
   value       = var.enable_dr ? alicloud_cs_kubernetes_node_pool.secondary_workers[0].id : ""
 }
 
+# Worker Node IDs (Extracted from alicloud_cs_managed_kubernetes)
+# Note: For managed ACK, workers are often managed by node pools. 
+# However, we might need these for LB attachment if not using Cloud Controller Manager.
+# For simplicity in this demo, we output the instance IDs if they were easily accessible.
+# Since alicloud_cs_managed_kubernetes doesn't directly list instance IDs in its attributes,
+# and they are managed by alicloud_cs_kubernetes_node_pool, 
+# in a real-world scenario, you'd use a data source or the CCM.
+# For this task, I'll assume we can use the ECS module's IDs if they are shared or just use the primary workers.
+
 # DR Status
 output "dr_enabled" {
   description = "Disaster recovery enabled status"

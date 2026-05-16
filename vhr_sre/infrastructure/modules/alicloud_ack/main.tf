@@ -86,6 +86,7 @@ resource "alicloud_cs_managed_kubernetes" "secondary" {
     })
   }
   
+  # Maintenance window
   maintenance_window {
     enable         = true
     maintenance_time = var.maintenance_time
@@ -101,7 +102,7 @@ resource "alicloud_cs_managed_kubernetes" "secondary" {
 
 # Primary Cluster Node Pool
 resource "alicloud_cs_kubernetes_node_pool" "primary_workers" {
-  name                 = "${var.cluster_name}-primary-workers"
+  node_pool_name       = "${var.cluster_name}-primary-workers" # Fixed: name -> node_pool_name
   cluster_id           = alicloud_cs_managed_kubernetes.primary.id
   vswitch_ids          = var.vswitch_ids
   instance_types       = var.node_instance_types
@@ -141,7 +142,7 @@ resource "alicloud_cs_kubernetes_node_pool" "primary_workers" {
 resource "alicloud_cs_kubernetes_node_pool" "secondary_workers" {
   count = var.enable_dr ? 1 : 0
   
-  name                 = "${var.cluster_name}-secondary-workers"
+  node_pool_name       = "${var.cluster_name}-secondary-workers" # Fixed: name -> node_pool_name
   cluster_id           = alicloud_cs_managed_kubernetes.secondary[0].id
   vswitch_ids          = var.dr_vswitch_ids
   instance_types       = var.node_instance_types

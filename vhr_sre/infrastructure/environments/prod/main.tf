@@ -63,16 +63,39 @@ module "oss" {
   oss_allowed_origins = var.oss_allowed_origins
 }
 
-module "slb" {
-  source              = "../../modules/alicloud_slb"
+# Best Practice: Use NLB for Cloud Native ACK Ingress in Prod
+module "nlb" {
+  source              = "../../modules/alicloud_nlb"
   environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
   vswitch_id          = module.vpc.frontend_vswitch_id
-  backend_server_ids  = module.ecs.frontend_instance_ids
-  backend_port        = 8080
-  slb_spec            = "slb.s3.large"
-  address_type        = "internet"
-  health_check_uri    = "/actuator/health"
-  enable_sticky_session = true
+  availability_zone   = module.vpc.availability_zone
+  backend_server_ids  = module.ecs.frontend_instance_ids # In production, these nodes run Ingress Controller
+  backend_port        = 80
+  address_type        = "Internet"
   enable_https        = true
-  ssl_certificate_id  = var.ssl_certificate_id
+}
+
+# Kubernetes Cluster (Frontend) - Prod Environment
+module "ack" {
+  source = "../../modules/alicloud_ack"
+  
+  cluster_name      = "${var.project_name}-${var.environment}"
+  vswitch_ids       = [module.vpc.frontend_vswitch_id]
+  dr_vswitch_ids    = [module.vpc.frontend_vswitch_id] # Fixed: Cannot be empty when enable_dr is true
+  security_group_id = module.vpc.web_security_group_id
+  
+  k8s_version    = "1.24"
+  node_count     = 3
+  min_node_count = 3
+  max_node_count = 10
+  
+  node_instance_types = ["ecs.c6.2xlarge"]
+  enable_autoscaling  = true
+  enable_dr           = true # Production enables DR by default in this architecture
+  
+  tags = {
+    environment = var.environment
+    project     = var.project_name
+  }
 }

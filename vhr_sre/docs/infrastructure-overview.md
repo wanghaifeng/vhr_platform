@@ -1,4 +1,4 @@
-# vhr Project Infrastructure Diagram
+# vhr Project Infrastructure Diagram (Frontend Cloud Native Phase)
 
 <img src="./infra_diagram.png">
 
@@ -15,127 +15,78 @@
 | **Web Security Group** | alicloud_security_group | vhr-dev-web-sg | vhr-test-web-sg | vhr-staging-web-sg | vhr-perf-web-sg | vhr-prod-web-sg |
 | **Backend Security Group** | alicloud_security_group | vhr-dev-backend-sg | vhr-test-backend-sg | vhr-staging-backend-sg | vhr-perf-backend-sg | vhr-prod-backend-sg |
 | **DB Security Group** | alicloud_security_group | vhr-dev-db-sg | vhr-test-db-sg | vhr-staging-db-sg | vhr-perf-db-sg | vhr-prod-db-sg |
-| **Frontend ECS** | alicloud_instance | 1 × ecs.c6.large | 1 × ecs.c6.medium | 1 × ecs.c6.medium | 2 × ecs.c6.xlarge | 2 × ecs.c6.2xlarge |
+| **Frontend ACK Nodes** | alicloud_instance | 1 × ecs.c6.large | 2 × ecs.c6.medium | 3 × ecs.c6.large | 3 × ecs.c6.xlarge | 3 × ecs.c6.2xlarge |
 | **Backend ECS** | alicloud_instance | 1 × ecs.c6.large | 1 × ecs.c6.medium | 2 × ecs.c6.large | 2 × ecs.c6.xlarge | 4 × ecs.c6.2xlarge |
 | **MySQL RDS** | alicloud_db_instance | rds.mysql.c6.large (20GB) | rds.mysql.s1.small (10GB) | rds.mysql.s2.medium (50GB) | rds.mysql.s3.large (100GB) | rds.mysql.s4.large (200GB) |
 | **Redis KVStore** | alicloud_kvstore_instance | Redis (10GB) | Redis (10GB) | Redis (50GB) | Redis (100GB) | Redis (200GB) |
 | **OSS Bucket** | alicloud_oss_bucket | dev-vhr-app-storage | test-vhr-app-storage | staging-vhr-app-storage | perf-vhr-app-storage | prod-vhr-app-storage |
-| **Load Balancer (SLB)** | alicloud_slb_load_balancer | slb.s1.small (HTTP) | slb.s2.small (HTTP) | slb.s2.medium (HTTPS) | slb.s3.medium (HTTP) | slb.s3.large (HTTPS) |
+| **Load Balancer (NLB)** | alicloud_nlb_load_balancer | Pay-as-you-go (TCP) | Pay-as-you-go (TCP) | Pay-as-you-go (TCP/TLS) | Pay-as-you-go (TCP) | Pay-as-you-go (TCP/TLS) |
 | **Container Registry (ACR)** | alicloud_cr_namespace | vhr (shared) | vhr (shared) | vhr (shared) | vhr (shared) | vhr (shared) |
 | **Frontend Image Repo** | alicloud_cr_repo | vhr/frontend | vhr/frontend | vhr/frontend | vhr/frontend | vhr/frontend |
-| **Backend Image Repo** | alicloud_cr_repo | vhr/backend | vhr/backend | vhr/backend | vhr/backend | vhr/backend |
-| **Kubernetes Cluster** | alicloud_cs_managed_kubernetes | vhr-dev (1 node) | vhr-test (2 nodes) | vhr-staging (3 nodes) | vhr-perf (3 nodes) | vhr-prod (3 nodes, DR) |
-| **K8s Service CIDR** | - | 172.19.0.0/20 | 172.19.0.0/20 | 172.19.0.0/20 | 172.19.0.0/20 | 172.19.0.0/20 |
-| **K8s Pod CIDR** | - | 10.99.0.0/16 | 10.99.0.0/16 | 10.99.0.0/16 | 10.99.0.0/16 | 10.99.0.0/16 |
-| **Ingress Controller** | NGINX Ingress | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Helm Charts** | Helm 3 | vhr-frontend | vhr-frontend | vhr-frontend | vhr-frontend | vhr-frontend |
-| **Terraform State** | OSS Backend | vhr-terraform-state-dev | vhr-terraform-state-test | vhr-terraform-state-staging | vhr-terraform-state-perf | vhr-terraform-state-prod |
+| **Kubernetes Cluster** | alicloud_cs_managed_kubernetes | vhr-dev (Frontend Only) | vhr-test | vhr-staging | vhr-perf | vhr-prod (DR) |
 
-### Component Details
+### Current State: Hybrid Architecture
 
-| Category | Component | Description | Terraform Resource |
-|----------|-----------|-------------|-------------------|
-| **Network** | VPC | Virtual Private Cloud for isolated network | `alicloud_vpc` |
-| | VSwitch | Subnets for frontend, backend, and database tiers | `alicloud_vswitch` |
-| | Security Group | Firewall rules for traffic control | `alicloud_security_group` |
-| | Security Group Rule | Ingress/egress rules | `alicloud_security_group_rule` |
-| **Compute** | ECS Instance | Elastic Compute Service (virtual machines) | `alicloud_instance` |
-| **Database** | RDS MySQL | Managed MySQL database service | `alicloud_db_instance` |
-| | DB Account | Database user account | `alicloud_db_account` |
-| | DB Database | Logical database | `alicloud_db_database` |
-| **Cache** | KVStore Redis | Managed Redis instance | `alicloud_kvstore_instance` |
-| **Storage** | OSS Bucket | Object Storage Service | `alicloud_oss_bucket` |
-| | OSS Bucket ACL | Access control configuration | `alicloud_oss_bucket_acl` |
-| **Load Balancing** | SLB Load Balancer | Server Load Balancer for traffic distribution | `alicloud_slb_load_balancer` |
-| | SLB Listener | Listener for HTTP/HTTPS traffic | `alicloud_slb_listener` |
-| | SLB Backend Server | Backend ECS instances attachment | `alicloud_slb_backend_server` |
-| **Container** | ACR Namespace | Container Registry namespace for images | `alicloud_cr_namespace` |
-| | ACR Repository | Container image repository | `alicloud_cr_repo` |
-| **Kubernetes** | ACK Cluster | Managed Kubernetes cluster | `alicloud_cs_managed_kubernetes` |
-| | ACK Node Pool | Worker node pool with autoscaling | `alicloud_cs_kubernetes_node_pool` |
-| | Helm Chart | Package manager for K8s deployments | Helm 3 |
-| | Ingress Controller | HTTP(S) routing and load balancing | NGINX Ingress |
-| **Monitoring** | Prometheus | Metrics collection and alerting | kube-prometheus-stack |
-| | Grafana | Visualization dashboards | kube-prometheus-stack |
-
-### Security Group Rules
-
-| Environment | Rule Name | Port | Source | Description |
-|-------------|-----------|------|--------|-------------|
-| dev | allow_backend_to_db | 3306 | 10.0.2.0/24 | MySQL access from backend |
-| test | allow_backend_to_db | 3306, 5672, 6379 | 10.4.2.0/24 | MySQL, RabbitMQ, Redis from backend |
-| staging | allow_backend_to_db | 3306, 6379 | 10.8.2.0/24 | MySQL, Redis from backend |
-| perf | allow_backend_to_db | 3306, 6379 | 10.12.2.0/24 | MySQL, Redis from backend |
-| prod | allow_backend_to_db | 3306, 6379 | 10.16.2.0/24 | MySQL, Redis from backend |
+In this phase, we have completed the **Frontend Migration** to ACK, while the **Backend Services** continue to run on legacy ECS instances.
 
 ```mermaid
 ---
 config:
   layout: dagre
 ---
-flowchart LR
- subgraph subGraph0["User Layer"]
-        B("CDN/Load Balancer")
-        A["User Browser/Client"]
-  end
- subgraph subGraph1["Network Layer"]
-        C{"Web Application Firewall/API Gateway"}
-        D["Nginx Reverse Proxy/API Gateway"]
-  end
- subgraph subGraph2["Application Layer (vhr-web & mailserver)"]
-    direction LR
-        E("Spring Boot Application Cluster")
-        F{"Cache: Redis"}
-        G{"Message Queue: RabbitMQ"}
-        H{"File Storage: FastDFS/OSS"}
-  end
- subgraph subGraph3["Data Layer"]
-        I["Database: MySQL/RDS"]
-  end
- subgraph subGraph4["Monitoring & Logging"]
-        J["Logging Service: ELK/SLS"]
-        K["Monitoring Service: Prometheus/Grafana/ARMS"]
-  end
- subgraph subGraph5["Security & Compliance"]
-        M("CI/CD Pipeline")
-        L["Policy as Code: OPA/Harness Policy"]
-  end
- subgraph subGraph6["CI/CD (GitHub Actions & Harness)"]
-        N("Code Repository: Git")
-        O("GitHub Actions CI")
-        P("Harness CD")
-  end
-    A -- HTTPS/HTTP --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F & G & H & I & J & K
-    L --> M
-    M --> N
-    N --> O
-    O --> P
-    P --> E & I & F & G & H
+flowchart TD
+    subgraph User_Access ["User Access Layer"]
+        User["User Browser"]
+    end
 
-     B:::boundary
-     A:::actor
-     C:::boundary
-     D:::boundary
-     E:::system
-     F:::service
-     G:::service
-     H:::service
-     I:::database
-     J:::tool
-     K:::tool
-     M:::tool
-     L:::tool
-     N:::tool
-     O:::tool
-     P:::tool
-    classDef default fill:#fff,stroke:#333,stroke-width:2px,color:#000
-    classDef actor fill:#ADD8E6,stroke:#336699,stroke-width:2px,color:#000
-    classDef boundary fill:#F0FFF0,stroke:#3CB371,stroke-width:2px,color:#000
-    classDef system fill:#F8F8FF,stroke:#6A5ACD,stroke-width:2px,color:#000
-    classDef database fill:#FFE4B5,stroke:#FF8C00,stroke-width:2px,color:#000
-    classDef service fill:#E6E6FA,stroke:#8A2BE2,stroke-width:2px,color:#000
-    classDef tool fill:#F5DEB3,stroke:#DAA520,stroke-width:2px,color:#000
+    subgraph Traffic_Management ["Traffic Management Layer"]
+        NLB["NLB (Layer 4)"]
+    end
+
+    subgraph Kubernetes_Cluster ["ACK Cluster (Cloud Native Frontend)"]
+        Ingress["NGINX Ingress Controller (Layer 7)"]
+        VHR_Web["vhr-frontend Pods"]
+    end
+
+    subgraph Legacy_Compute ["ECS Layer (Legacy Backend)"]
+        VHR_Srv["vhr-backend (Spring Boot on ECS)"]
+    end
+
+    subgraph Managed_Services ["Persistence & Middleware"]
+        RDS["RDS MySQL"]
+        Redis["KVStore for Redis"]
+    end
+
+    User --> NLB
+    NLB -- TCP --> Ingress
+    Ingress -- HTTP --> VHR_Web
+    VHR_Web -- API Call --> VHR_Srv
+    VHR_Srv --> RDS
+    VHR_Srv --> Redis
+```
+
+## Backend Migration Effort Analysis
+
+Migrating the backend from ECS to ACK is a separate phase. Below is an estimation of the effort required:
+
+| Task Category | Description | Effort Level | Key Activities |
+|---------------|-------------|--------------|----------------|
+| **Containerization** | Dockerizing the Spring Boot application | Low | Write Dockerfile, multi-stage build optimization. |
+| **Service Discovery** | Transitioning from IP-based to DNS-based discovery | Medium | Replace ECS IPs with K8s Service names (e.g., `vhr-backend-svc`). |
+| **Configuration** | Moving settings to Kubernetes | Medium | Migrate environment variables and file-based configs to ConfigMaps/Secrets. |
+| **Network & Security** | Updating Security Groups & Whitelists | Low | Update RDS/Redis white lists to include Pod CIDR (10.99.0.0/16). |
+| **CI/CD Pipeline** | Updating deployment workflows | Medium | Update Harness pipelines to use Helm for backend deployment. |
+| **Observability** | Integrating with Prometheus/Logtail | Low | Add annotations for metrics scraping and configure log paths. |
+
+### Summary of Effort
+*   **Total Estimated Time**: 3-5 days for a single environment.
+*   **Complexity**: Medium (due to state management and service-to-service communication).
+*   **Risk**: Low, as it can be done service-by-service using a hybrid approach (current state).
+
+## Load Balancer (Best Practices)
+
+Current implementation uses **NLB (Network Load Balancer)** as the entry point. 
+
+1.  **Layer 4 (NLB)**: Handles massive concurrent TCP connections.
+2.  **Layer 7 (Ingress)**: Handles SSL termination, Host-based routing, and Path-based routing for the **Frontend**.
+3.  **Future Proof**: When the backend is migrated, the same Ingress Controller can route `/api` traffic to backend Pods without changing the NLB configuration.
