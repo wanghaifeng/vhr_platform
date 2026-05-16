@@ -9,7 +9,8 @@ resource "alicloud_cs_managed_kubernetes" "primary" {
   pod_cidr                     = var.pod_cidr
   security_group_id            = var.security_group_id
   is_enterprise_security_group = false
-  slb_internet_enabled         = true
+  # Fixed: Use NLB as entry point, so disable default public SLB to save cost
+  slb_internet_enabled         = false
   
   # Kubernetes version
   version = var.k8s_version
@@ -62,7 +63,7 @@ resource "alicloud_cs_managed_kubernetes" "secondary" {
   pod_cidr                     = var.dr_pod_cidr
   security_group_id            = var.security_group_id
   is_enterprise_security_group = false
-  slb_internet_enabled         = true
+  slb_internet_enabled         = false
   
   version = var.k8s_version
   

@@ -56,7 +56,8 @@ resource "alicloud_nlb_listener" "tcp_443" {
 
 # Attach ACK Nodes to NLB Server Group
 resource "alicloud_nlb_server_group_server_attachment" "ack_nodes" {
-  count           = length(var.backend_server_ids)
+  # Use fixed count to avoid dynamic length errors during plan
+  count           = var.backend_server_count
   server_group_id = alicloud_nlb_server_group.this.id
   server_id       = var.backend_server_ids[count.index]
   server_type     = "Ecs"

@@ -28,6 +28,15 @@ resource "alicloud_vswitch" "database" {
   zone_id      = data.alicloud_zones.default.zones[0].id
 }
 
+resource "alicloud_vswitch" "dr" {
+  count        = var.dr_cidr != "" ? 1 : 0
+  vswitch_name = "${var.vpc_name}-dr-vsw"
+  vpc_id       = alicloud_vpc.this.id
+  cidr_block   = var.dr_cidr
+  # Use a different zone for DR if available
+  zone_id      = length(data.alicloud_zones.default.zones) > 1 ? data.alicloud_zones.default.zones[1].id : data.alicloud_zones.default.zones[0].id
+}
+
 resource "alicloud_security_group" "web_sg" {
   security_group_name = "${var.vpc_name}-web-sg"
   vpc_id = alicloud_vpc.this.id

@@ -3,11 +3,6 @@ output "vpc_id" {
   value       = module.vpc.vpc_id
 }
 
-output "frontend_instance_ids" {
-  description = "List of frontend ECS instance IDs"
-  value       = module.ecs.frontend_instance_ids
-}
-
 output "backend_instance_ids" {
   description = "List of backend ECS instance IDs"
   value       = module.ecs.backend_instance_ids

@@ -43,7 +43,8 @@ resource "alicloud_slb_listener" "https" {
   backend_port      = var.backend_port
   protocol          = "https"
   bandwidth         = -1
-  server_certificate_id = var.ssl_certificate_id # Fixed: ssl_certificate_id is deprecated
+  # Fixed: ssl_certificate_id is deprecated, use server_certificate_id only
+  server_certificate_id = var.ssl_certificate_id
 
   health_check              = "on"
   health_check_type         = "http"

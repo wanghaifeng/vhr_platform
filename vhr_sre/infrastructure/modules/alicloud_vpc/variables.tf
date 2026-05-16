@@ -24,6 +24,12 @@ variable "db_cidr" {
   type        = string
 }
 
+variable "dr_cidr" {
+  description = "CIDR for disaster recovery subnet"
+  type        = string
+  default     = ""
+}
+
 variable "allowed_db_ports" {
   description = "List of ports allowed for database security group"
   type        = list(string)

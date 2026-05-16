@@ -25,7 +25,7 @@ module "ecs" {
     backend  = "ecs.c6.large"
   }
   instance_counts = {
-    frontend = 1
+    frontend = 0 # Frontend migrated to ACK
     backend  = 1
   }
   frontend_vswitch_id     = module.vpc.frontend_vswitch_id
@@ -40,7 +40,7 @@ module "rds" {
   vpc_id            = module.vpc.vpc_id
   db_vswitch_id     = module.vpc.db_vswitch_id
   availability_zone = module.vpc.availability_zone
-  security_ip_list  = [module.vpc.backend_cidr]
+  security_ip_list  = [module.vpc.backend_cidr, "10.99.0.0/16"] # Add Pod CIDR
   mysql_root_password = var.mysql_root_password
   mysql_version     = "8.0"
   mysql_instance_type = "rds.mysql.c6.large"
@@ -54,7 +54,7 @@ module "kvstore" {
   vpc_id            = module.vpc.vpc_id
   db_vswitch_id     = module.vpc.db_vswitch_id
   availability_zone = module.vpc.availability_zone
-  security_ip_list  = [module.vpc.backend_cidr]
+  security_ip_list  = [module.vpc.backend_cidr, "10.99.0.0/16"] # Add Pod CIDR
   redis_password    = var.redis_password
   redis_version     = "5.0"
   redis_instance_type = "Redis"
@@ -67,17 +67,29 @@ module "oss" {
   oss_allowed_origins = var.oss_allowed_origins
 }
 
+# Data source to fetch ACK worker nodes
+data "alicloud_instances" "ack_nodes" {
+  vswitch_id = module.vpc.frontend_vswitch_id
+  tags = {
+    "role" = "primary"
+    "type" = "kubernetes-cluster"
+  }
+  # Wait for ACK to be created
+  depends_on = [module.ack]
+}
+
 # Best Practice: Use NLB for Cloud Native ACK Ingress
 module "nlb" {
-  source              = "../../modules/alicloud_nlb"
-  environment         = var.environment
-  vpc_id              = module.vpc.vpc_id
-  vswitch_id          = module.vpc.frontend_vswitch_id
-  availability_zone   = module.vpc.availability_zone
-  backend_server_ids  = module.ecs.frontend_instance_ids # In a real ACK, this would be ACK node IDs
-  backend_port        = 80 # Nginx Ingress Port
-  address_type        = "Internet"
-  enable_https        = false
+  source               = "../../modules/alicloud_nlb"
+  environment          = var.environment
+  vpc_id               = module.vpc.vpc_id
+  vswitch_id           = module.vpc.frontend_vswitch_id
+  availability_zone    = module.vpc.availability_zone
+  backend_server_ids   = data.alicloud_instances.ack_nodes.ids
+  backend_server_count = 1 # Match dev node_count
+  backend_port         = 80 # Nginx Ingress Port
+  address_type         = "Internet"
+  enable_https         = false
 }
 
 # Kubernetes Cluster (Frontend) - Dev 环境

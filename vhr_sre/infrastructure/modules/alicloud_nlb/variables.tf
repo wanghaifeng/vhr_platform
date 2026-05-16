@@ -29,6 +29,12 @@ variable "backend_server_ids" {
   type        = list(string)
 }
 
+variable "backend_server_count" {
+  description = "Number of backend servers (to avoid dynamic count errors)"
+  type        = number
+  default     = 0
+}
+
 variable "backend_port" {
   description = "Port used by Nginx Ingress Controller (e.g., 80 or NodePort)"
   type        = number

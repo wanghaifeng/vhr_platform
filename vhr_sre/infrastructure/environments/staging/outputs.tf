@@ -3,11 +3,6 @@ output "vpc_id" {
   value       = module.vpc.vpc_id
 }
 
-output "frontend_instance_ids" {
-  description = "List of frontend ECS instance IDs"
-  value       = module.ecs.frontend_instance_ids
-}
-
 output "backend_instance_ids" {
   description = "List of backend ECS instance IDs"
   value       = module.ecs.backend_instance_ids
@@ -28,12 +23,34 @@ output "oss_bucket_name" {
   value       = module.oss.oss_bucket_name
 }
 
-output "slb_ip_address" {
-  description = "The IP address of the SLB"
-  value       = module.slb.slb_ip_address
+output "nlb_dns_name" {
+  description = "The DNS name of the NLB"
+  value       = module.nlb.nlb_dns_name
 }
 
-output "slb_id" {
-  description = "The ID of the SLB instance"
-  value       = module.slb.slb_id
+output "nlb_id" {
+  description = "The ID of the NLB instance"
+  value       = module.nlb.nlb_id
+}
+
+# Kubernetes outputs
+output "k8s_cluster_id" {
+  description = "Kubernetes cluster ID"
+  value       = module.ack.primary_cluster_id
+}
+
+output "k8s_cluster_endpoint" {
+  description = "Kubernetes cluster API endpoint"
+  value       = module.ack.primary_cluster_endpoint
+}
+
+# Container Registry outputs
+output "acr_registry_endpoint" {
+  description = "Container registry endpoint"
+  value       = module.acr.registry_endpoint
+}
+
+output "acr_frontend_repo_url" {
+  description = "Frontend container image URL"
+  value       = module.acr.frontend_repo_url
 }
