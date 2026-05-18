@@ -40,6 +40,7 @@ module "rds" {
   vpc_id                 = module.vpc.vpc_id
   db_vswitch_id          = module.vpc.db_vswitch_id
   availability_zone      = module.vpc.availability_zone
+  backup_availability_zone = module.vpc.dr_availability_zone 
   security_ip_list       = [module.vpc.backend_cidr, "10.99.0.0/16"] # Add Pod CIDR
   mysql_instance_type    = "rds.mysql.s4.large"
   mysql_instance_storage = 200
@@ -52,6 +53,7 @@ module "kvstore" {
   vpc_id                 = module.vpc.vpc_id
   db_vswitch_id          = module.vpc.db_vswitch_id
   availability_zone      = module.vpc.availability_zone
+  backup_availability_zone = module.vpc.dr_availability_zone
   security_ip_list       = [module.vpc.backend_cidr, "10.99.0.0/16"] # Add Pod CIDR
   redis_instance_type    = "Redis"
   redis_instance_storage = 200
@@ -80,7 +82,7 @@ module "nlb" {
   source               = "../../modules/alicloud_nlb"
   environment          = var.environment
   vpc_id               = module.vpc.vpc_id
-  vswitch_id           = module.vpc.frontend_vswitch_id
+  vswitch_id           = [module.vpc.frontend_vswitch_id, module.vpc.dr_vswitch_id]
   availability_zone    = module.vpc.availability_zone
   backend_server_ids   = data.alicloud_instances.ack_nodes.ids
   backend_server_count = 3 # Match prod node_count
