@@ -1,12 +1,12 @@
 # Production environment values
-replicaCount: 3
+replicaCount: 2
 
 image:
-  tag: "prod"
+  tag: "perf"
 
 resources:
   limits:
-    cpu: 1000m
+    cpu: 500m
     memory: 512Mi
   requests:
     cpu: 200m
@@ -14,16 +14,16 @@ resources:
 
 ingress:
   hosts:
-    - host: vhr.example.com
+    - host: vhr-perf.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: vhr-frontend-prod-tls
+    - secretName: vhr-frontend-perf-tls
       hosts:
-        - vhr.example.com
+        - vhr-perf.example.com
 
 autoscaling:
   enabled: true
-  minReplicas: 3
-  maxReplicas: 10
+  minReplicas: 2
+  maxReplicas: 5
