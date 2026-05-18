@@ -123,3 +123,17 @@ module "acr" {
   visibility     = "PRIVATE"
   region         = var.region
 }
+
+# RAM / IAM for Dev environment
+module "ram" {
+  source       = "../../modules/alicloud_ram"
+  environment  = var.environment
+  project_name = var.project_name
+  region       = var.region
+  vpc_id       = module.vpc.vpc_id
+
+  create_ci_user           = true
+  create_readonly_user     = true
+  create_ack_worker_policy = true
+  ack_worker_ram_role_name = module.ack.primary_worker_role_arn
+}

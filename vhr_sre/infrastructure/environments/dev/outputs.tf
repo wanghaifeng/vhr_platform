@@ -54,3 +54,19 @@ output "acr_frontend_repo_url" {
   description = "Frontend container image URL"
   value       = module.acr.frontend_repo_url
 }
+
+# RAM outputs
+output "ram_ci_user_name" {
+  description = "CI/CD RAM user name for this environment"
+  value       = module.ram.ci_user_name
+}
+
+output "ram_env_admin_role_name" {
+  description = "Environment admin RAM role name (for assume-role)"
+  value       = module.ram.env_admin_role_name
+}
+
+output "ram_env_admin_role_arn" {
+  description = "Environment admin RAM role ARN"
+  value       = module.ram.env_admin_role_arn
+}

@@ -54,3 +54,35 @@ output "acr_frontend_repo_url" {
   description = "Frontend container image URL"
   value       = module.acr.frontend_repo_url
 }
+
+# Staging-specific outputs for external integration
+output "staging_uat_fqdn" {
+  description = "Staging UAT fully qualified domain name"
+  value       = var.staging_domain != "" ? "${var.staging_domain_subdomain}.${var.dns_domain_name}" : ""
+}
+
+output "staging_api_fqdn" {
+  description = "Staging API fully qualified domain name"
+  value       = var.staging_api_subdomain != "" ? "${var.staging_api_subdomain}.${var.dns_domain_name}" : ""
+}
+
+output "allowed_external_cidrs" {
+  description = "External CIDRs allowed to access staging"
+  value       = var.allowed_external_cidrs
+}
+
+# RAM outputs
+output "ram_ci_user_name" {
+  description = "CI/CD RAM user name for this environment"
+  value       = module.ram.ci_user_name
+}
+
+output "ram_env_admin_role_name" {
+  description = "Environment admin RAM role name (for assume-role)"
+  value       = module.ram.env_admin_role_name
+}
+
+output "ram_env_admin_role_arn" {
+  description = "Environment admin RAM role ARN"
+  value       = module.ram.env_admin_role_arn
+}

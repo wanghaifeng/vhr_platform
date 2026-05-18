@@ -64,3 +64,29 @@ resource "alicloud_security_group_rule" "allow_backend_to_db" {
   security_group_id = alicloud_security_group.db_sg.id
   cidr_ip           = alicloud_vswitch.backend.cidr_block
 }
+
+resource "alicloud_security_group_rule" "allow_external_to_web" {
+  for_each = toset(var.allowed_external_cidrs)
+
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "internet"
+  policy            = "accept"
+  port_range        = "443/443"
+  priority          = 1
+  security_group_id = alicloud_security_group.web_sg.id
+  cidr_ip           = each.value
+}
+
+resource "alicloud_security_group_rule" "allow_external_to_web_http" {
+  for_each = length(var.allowed_external_cidrs) > 0 ? toset(var.allowed_external_cidrs) : toset([])
+
+  type              = "ingress"
+  ip_protocol       = "tcp"
+  nic_type          = "internet"
+  policy            = "accept"
+  port_range        = "80/80"
+  priority          = 1
+  security_group_id = alicloud_security_group.web_sg.id
+  cidr_ip           = each.value
+}

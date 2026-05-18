@@ -36,6 +36,12 @@ variable "allowed_db_ports" {
   default     = ["3306", "6379", "5672"]
 }
 
+variable "allowed_external_cidrs" {
+  description = "List of external CIDR blocks allowed to access web tier (e.g., partner IPs for staging UAT)"
+  type        = list(string)
+  default     = []
+}
+
 variable "environment" {
   description = "Deployment environment (dev, test, perf, staging, prod)"
   type        = string

@@ -13,14 +13,29 @@ output "rds_connection_string" {
   value       = module.rds.rds_connection_string
 }
 
+output "rds_port" {
+  description = "The port of the RDS instance"
+  value       = module.rds.rds_port
+}
+
 output "redis_connection_string" {
   description = "The connection string of the Redis instance"
   value       = module.kvstore.redis_connection_string
 }
 
+output "redis_port" {
+  description = "The port of the Redis instance"
+  value       = module.kvstore.redis_port
+}
+
 output "oss_bucket_name" {
   description = "The name of the OSS bucket"
   value       = module.oss.oss_bucket_name
+}
+
+output "oss_bucket_endpoint" {
+  description = "The endpoint of the OSS bucket"
+  value       = module.oss.oss_bucket_endpoint
 }
 
 output "nlb_dns_name" {
@@ -44,6 +59,11 @@ output "k8s_cluster_endpoint" {
   value       = module.ack.primary_cluster_endpoint
 }
 
+output "k8s_cluster_version" {
+  description = "Kubernetes cluster version"
+  value       = module.ack.primary_cluster_version
+}
+
 # Container Registry outputs
 output "acr_registry_endpoint" {
   description = "Container registry endpoint"
@@ -53,4 +73,25 @@ output "acr_registry_endpoint" {
 output "acr_frontend_repo_url" {
   description = "Frontend container image URL"
   value       = module.acr.frontend_repo_url
+}
+
+output "acr_backend_repo_url" {
+  description = "Backend container image URL"
+  value       = module.acr.backend_repo_url
+}
+
+# RAM outputs
+output "ram_ci_user_name" {
+  description = "CI/CD RAM user name for this environment"
+  value       = module.ram.ci_user_name
+}
+
+output "ram_env_admin_role_name" {
+  description = "Environment admin RAM role name (for assume-role)"
+  value       = module.ram.env_admin_role_name
+}
+
+output "ram_env_admin_role_arn" {
+  description = "Environment admin RAM role ARN"
+  value       = module.ram.env_admin_role_arn
 }

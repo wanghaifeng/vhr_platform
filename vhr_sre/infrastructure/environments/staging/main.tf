@@ -12,7 +12,8 @@ module "vpc" {
   backend_cidr  = "10.8.2.0/24"
   db_cidr       = "10.8.3.0/24"
 
-  allowed_db_ports = ["3306", "6379"]
+  allowed_db_ports       = ["3306", "6379"]
+  allowed_external_cidrs = var.allowed_external_cidrs
 }
 
 module "ecs" {
@@ -81,10 +82,12 @@ module "nlb" {
   vswitch_id           = module.vpc.frontend_vswitch_id
   availability_zone    = module.vpc.availability_zone
   backend_server_ids   = data.alicloud_instances.ack_nodes.ids
-  backend_server_count = 2 # Match staging node_count
+  backend_server_count = 2
   backend_port         = 80
   address_type         = "Internet"
   enable_https         = true
+  ssl_certificate_id   = var.ssl_certificate_id
+  enable_ssl_at_nlb    = var.enable_ssl_at_nlb
 }
 
 # Kubernetes Cluster - Staging 环境
@@ -117,4 +120,40 @@ module "acr" {
   namespace_name = var.project_name
   visibility     = "PRIVATE"
   region         = var.region
+}
+
+# Staging-specific: DNS record for UAT/external integration domain
+resource "alicloud_alidns_record" "staging_uat" {
+  count       = var.staging_domain != "" ? 1 : 0
+  domain_name = var.dns_domain_name
+  type        = "CNAME"
+  rr          = var.staging_domain_subdomain
+  value       = module.nlb.nlb_dns_name
+  priority    = 10
+  ttl         = 600
+}
+
+# Staging-specific: DNS record for API endpoint (external integration)
+resource "alicloud_alidns_record" "staging_api" {
+  count       = var.staging_api_subdomain != "" ? 1 : 0
+  domain_name = var.dns_domain_name
+  type        = "CNAME"
+  rr          = var.staging_api_subdomain
+  value       = module.nlb.nlb_dns_name
+  priority    = 10
+  ttl         = 600
+}
+
+# RAM / IAM for Staging environment
+module "ram" {
+  source       = "../../modules/alicloud_ram"
+  environment  = var.environment
+  project_name = var.project_name
+  region       = var.region
+  vpc_id       = module.vpc.vpc_id
+
+  create_ci_user           = true
+  create_readonly_user     = true
+  create_ack_worker_policy = true
+  ack_worker_ram_role_name = module.ack.primary_worker_role_arn
 }
