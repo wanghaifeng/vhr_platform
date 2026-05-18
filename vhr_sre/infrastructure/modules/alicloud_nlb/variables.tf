@@ -25,7 +25,7 @@ variable "address_type" {
 }
 
 variable "backend_server_ids" {
-  description = "List of backend server IDs (ECS instances)"
+  description = "List of backend server IDs (ECS instances or ACK nodes)"
   type        = list(string)
 }
 
@@ -42,7 +42,19 @@ variable "backend_port" {
 }
 
 variable "enable_https" {
-  description = "Enable TCP 443 listener"
+  description = "Enable TCP 443 listener (SSL termination handled by Ingress Controller)"
+  type        = bool
+  default     = false
+}
+
+variable "ssl_certificate_id" {
+  description = "SSL certificate ID for TCPSSL listener (optional, use if NLB should terminate SSL)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_ssl_at_nlb" {
+  description = "Enable SSL termination at NLB (TCPSSL). If false, SSL termination is at Ingress Controller."
   type        = bool
   default     = false
 }

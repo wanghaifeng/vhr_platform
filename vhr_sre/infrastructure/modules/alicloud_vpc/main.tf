@@ -34,26 +34,26 @@ resource "alicloud_vswitch" "dr" {
   vpc_id       = alicloud_vpc.this.id
   cidr_block   = var.dr_cidr
   # Use a different zone for DR if available
-  zone_id      = length(data.alicloud_zones.default.zones) > 1 ? data.alicloud_zones.default.zones[1].id : data.alicloud_zones.default.zones[0].id
+  zone_id = length(data.alicloud_zones.default.zones) > 1 ? data.alicloud_zones.default.zones[1].id : data.alicloud_zones.default.zones[0].id
 }
 
 resource "alicloud_security_group" "web_sg" {
   security_group_name = "${var.vpc_name}-web-sg"
-  vpc_id = alicloud_vpc.this.id
+  vpc_id              = alicloud_vpc.this.id
 }
 
 resource "alicloud_security_group" "backend_sg" {
   security_group_name = "${var.vpc_name}-backend-sg"
-  vpc_id = alicloud_vpc.this.id
+  vpc_id              = alicloud_vpc.this.id
 }
 
 resource "alicloud_security_group" "db_sg" {
   security_group_name = "${var.vpc_name}-db-sg"
-  vpc_id = alicloud_vpc.this.id
+  vpc_id              = alicloud_vpc.this.id
 }
 
 resource "alicloud_security_group_rule" "allow_backend_to_db" {
-  for_each          = toset(var.allowed_db_ports)
+  for_each = toset(var.allowed_db_ports)
 
   type              = "ingress"
   ip_protocol       = "tcp"

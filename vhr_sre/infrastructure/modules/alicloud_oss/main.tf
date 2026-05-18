@@ -1,5 +1,5 @@
 resource "alicloud_oss_bucket" "app_storage" {
-  bucket = "${var.environment}-vhr-app-storage"
+  bucket        = "${var.environment}-vhr-app-storage"
   storage_class = "Standard"
   force_destroy = true
 

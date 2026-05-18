@@ -67,8 +67,8 @@ variable "enable_https" {
   default     = false
 }
 
-variable "ssl_certificate_id" {
-  description = "SSL certificate ID for HTTPS"
+variable "server_certificate_id" {
+  description = "SSL certificate ID for HTTPS (server certificate)"
   type        = string
   default     = ""
 }

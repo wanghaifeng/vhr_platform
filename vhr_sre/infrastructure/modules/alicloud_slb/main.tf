@@ -1,8 +1,8 @@
 resource "alicloud_slb_load_balancer" "main" {
-  load_balancer_name = "${var.environment}-vhr-slb"
-  vswitch_id         = var.vswitch_id
-  load_balancer_spec = var.slb_spec
-  address_type       = var.address_type
+  load_balancer_name   = "${var.environment}-vhr-slb"
+  vswitch_id           = var.vswitch_id
+  load_balancer_spec   = var.slb_spec
+  address_type         = var.address_type
   internet_charge_type = var.internet_charge_type
 
   tags = {
@@ -30,21 +30,20 @@ resource "alicloud_slb_listener" "http" {
   health_check_timeout      = 5
   health_check_interval     = 5
 
-  sticky_session            = var.enable_sticky_session ? "on" : "off"
-  sticky_session_type       = var.enable_sticky_session ? "insert" : ""
-  cookie_timeout            = var.enable_sticky_session ? 86400 : 0
+  sticky_session      = var.enable_sticky_session ? "on" : "off"
+  sticky_session_type = var.enable_sticky_session ? "insert" : ""
+  cookie_timeout      = var.enable_sticky_session ? 86400 : 0
 }
 
 # HTTPS Listener (Port 443)
 resource "alicloud_slb_listener" "https" {
-  count             = var.enable_https ? 1 : 0
-  load_balancer_id  = alicloud_slb_load_balancer.main.id
-  frontend_port     = 443
-  backend_port      = var.backend_port
-  protocol          = "https"
-  bandwidth         = -1
-  # Fixed: ssl_certificate_id is deprecated, use server_certificate_id only
-  server_certificate_id = var.ssl_certificate_id
+  count                 = var.enable_https ? 1 : 0
+  load_balancer_id      = alicloud_slb_load_balancer.main.id
+  frontend_port         = 443
+  backend_port          = var.backend_port
+  protocol              = "https"
+  bandwidth             = -1
+  server_certificate_id = var.server_certificate_id
 
   health_check              = "on"
   health_check_type         = "http"
@@ -56,9 +55,9 @@ resource "alicloud_slb_listener" "https" {
   health_check_timeout      = 5
   health_check_interval     = 5
 
-  sticky_session            = var.enable_sticky_session ? "on" : "off"
-  sticky_session_type       = var.enable_sticky_session ? "insert" : ""
-  cookie_timeout            = var.enable_sticky_session ? 86400 : 0
+  sticky_session      = var.enable_sticky_session ? "on" : "off"
+  sticky_session_type = var.enable_sticky_session ? "insert" : ""
+  cookie_timeout      = var.enable_sticky_session ? 86400 : 0
 }
 
 # Backend Servers Attachment
