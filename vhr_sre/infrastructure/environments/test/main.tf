@@ -111,14 +111,6 @@ module "ack" {
   }
 }
 
-# Add ACR for Test environment
-module "acr" {
-  source         = "../../modules/alicloud_acr"
-  namespace_name = var.project_name
-  visibility     = "PRIVATE"
-  region         = var.region
-}
-
 # RAM / IAM for Test environment
 module "ram" {
   source       = "../../modules/alicloud_ram"

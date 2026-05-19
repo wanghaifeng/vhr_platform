@@ -116,14 +116,6 @@ module "ack" {
   }
 }
 
-# Container Registry (shared across all environments)
-module "acr" {
-  source         = "../../modules/alicloud_acr"
-  namespace_name = var.project_name
-  visibility     = "PRIVATE"
-  region         = var.region
-}
-
 # RAM / IAM for Dev environment
 module "ram" {
   source       = "../../modules/alicloud_ram"

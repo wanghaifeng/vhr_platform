@@ -64,22 +64,6 @@ output "k8s_cluster_version" {
   value       = module.ack.primary_cluster_version
 }
 
-# Container Registry outputs
-output "acr_registry_endpoint" {
-  description = "Container registry endpoint"
-  value       = module.acr.registry_endpoint
-}
-
-output "acr_frontend_repo_url" {
-  description = "Frontend container image URL"
-  value       = module.acr.frontend_repo_url
-}
-
-output "acr_backend_repo_url" {
-  description = "Backend container image URL"
-  value       = module.acr.backend_repo_url
-}
-
 # RAM outputs
 output "ram_ci_user_name" {
   description = "CI/CD RAM user name for this environment"

@@ -25,6 +25,10 @@ resource "alicloud_log_store" "vhr_error_log_store" {
   max_split_shard_count = 60
 }
 
-# Example of a simple monitoring dashboard or alert if needed later.
-# This part is highly dependent on the specific monitoring service (e.g., CloudMonitor, Grafana).
-# For simplicity, we are just creating the logging infrastructure here.
+# Shared ACR (Container Registry) across all environments
+module "acr" {
+  source         = "./modules/alicloud_acr"
+  namespace_name = var.project_name
+  visibility     = "PRIVATE"
+  region         = var.region
+}

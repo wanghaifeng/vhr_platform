@@ -114,14 +114,6 @@ module "ack" {
   }
 }
 
-# Add ACR for Staging environment
-module "acr" {
-  source         = "../../modules/alicloud_acr"
-  namespace_name = var.project_name
-  visibility     = "PRIVATE"
-  region         = var.region
-}
-
 # Staging-specific: DNS record for UAT/external integration domain
 resource "alicloud_alidns_record" "staging_uat" {
   count       = var.staging_domain != "" ? 1 : 0
