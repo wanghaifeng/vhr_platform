@@ -40,11 +40,19 @@ module "rds" {
   vpc_id                 = module.vpc.vpc_id
   db_vswitch_id          = module.vpc.db_vswitch_id
   availability_zone      = module.vpc.availability_zone
-  backup_availability_zone = module.vpc.dr_availability_zone 
-  security_ip_list       = [module.vpc.backend_cidr, "10.99.0.0/16"] # Add Pod CIDR
+  dr_availability_zone   = module.vpc.dr_availability_zone
+  dr_vswitch_id          = module.vpc.dr_vswitch_id
+  category               = "HighAvailability"
+  security_ip_list       = [module.vpc.backend_cidr, "10.99.0.0/16"]
   mysql_instance_type    = "rds.mysql.s4.large"
   mysql_instance_storage = 200
   mysql_root_password    = var.mysql_root_password
+
+  backup_period               = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+  backup_time                 = "02:00Z-03:00Z"
+  backup_retention_period     = 30
+  enable_backup_log           = true
+  log_backup_retention_period = 30
 }
 
 module "kvstore" {
@@ -53,11 +61,15 @@ module "kvstore" {
   vpc_id                 = module.vpc.vpc_id
   db_vswitch_id          = module.vpc.db_vswitch_id
   availability_zone      = module.vpc.availability_zone
-  backup_availability_zone = module.vpc.dr_availability_zone
-  security_ip_list       = [module.vpc.backend_cidr, "10.99.0.0/16"] # Add Pod CIDR
+  dr_availability_zone   = module.vpc.dr_availability_zone
+  dr_vswitch_id          = module.vpc.dr_vswitch_id
+  security_ip_list       = [module.vpc.backend_cidr, "10.99.0.0/16"]
   redis_instance_type    = "Redis"
+  redis_instance_class   = "redis.master.small.default"
   redis_instance_storage = 200
   redis_password         = var.redis_password
+
+  enable_backup_log = 1
 }
 
 module "oss" {
@@ -83,7 +95,7 @@ module "nlb" {
   environment          = var.environment
   vpc_id               = module.vpc.vpc_id
   vswitch_id           = [module.vpc.frontend_vswitch_id, module.vpc.dr_vswitch_id]
-  availability_zone    = module.vpc.availability_zone
+  availability_zone    = [module.vpc.availability_zone, module.vpc.dr_availability_zone]
   backend_server_ids   = data.alicloud_instances.ack_nodes.ids
   backend_server_count = 3 # Match prod node_count
   backend_port         = 80

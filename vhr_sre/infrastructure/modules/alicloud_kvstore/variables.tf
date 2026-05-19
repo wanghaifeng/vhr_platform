@@ -18,8 +18,20 @@ variable "db_vswitch_id" {
 }
 
 variable "availability_zone" {
-  description = "The availability zone for the Redis instance"
+  description = "The primary availability zone for the Redis instance"
   type        = string
+}
+
+variable "dr_availability_zone" {
+  description = "The DR availability zone for the Redis standby instance (used for cross-AZ HA)"
+  type        = string
+  default     = ""
+}
+
+variable "dr_vswitch_id" {
+  description = "The ID of the DR VSwitch for the Redis standby instance (used for cross-AZ HA)"
+  type        = string
+  default     = ""
 }
 
 variable "security_ip_list" {
@@ -35,7 +47,13 @@ variable "redis_version" {
 }
 
 variable "redis_instance_type" {
-  description = "Redis instance type"
+  description = "Redis instance type (Redis or Memcache)"
+  type        = string
+  default     = "Redis"
+}
+
+variable "redis_instance_class" {
+  description = "Redis instance class (e.g. redis.master.small.default for standard, redis.cluster.small.default for cluster)"
   type        = string
   default     = "redis.master.small.default"
 }
@@ -51,4 +69,10 @@ variable "redis_password" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "enable_backup_log" {
+  description = "Whether to enable log backup for the Redis instance (1 = enabled, 0 = disabled)"
+  type        = number
+  default     = 0
 }

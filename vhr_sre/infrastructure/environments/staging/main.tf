@@ -79,8 +79,8 @@ module "nlb" {
   source               = "../../modules/alicloud_nlb"
   environment          = var.environment
   vpc_id               = module.vpc.vpc_id
-  vswitch_id           = module.vpc.frontend_vswitch_id
-  availability_zone    = module.vpc.availability_zone
+  vswitch_id           = [module.vpc.frontend_vswitch_id]
+  availability_zone    = [module.vpc.availability_zone]
   backend_server_ids   = data.alicloud_instances.ack_nodes.ids
   backend_server_count = 2
   backend_port         = 80

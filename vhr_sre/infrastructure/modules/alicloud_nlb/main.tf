@@ -5,9 +5,12 @@ resource "alicloud_nlb_load_balancer" "this" {
   address_ip_version = "Ipv4"
   vpc_id             = var.vpc_id
 
-  zone_mappings {
-    vswitch_id = var.vswitch_id
-    zone_id    = var.availability_zone
+  dynamic "zone_mappings" {
+    for_each = range(length(var.vswitch_id))
+    content {
+      vswitch_id = var.vswitch_id[zone_mappings.value]
+      zone_id    = var.availability_zone[zone_mappings.value]
+    }
   }
 
   tags = {

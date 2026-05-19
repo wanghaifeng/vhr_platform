@@ -9,13 +9,13 @@ variable "vpc_id" {
 }
 
 variable "vswitch_id" {
-  description = "VSwitch ID for the load balancer mappings"
-  type        = string
+  description = "VSwitch ID(s) for the load balancer zone mappings. String for single AZ, list(string) for multi-AZ"
+  type        = list(string)
 }
 
 variable "availability_zone" {
-  description = "Availability zone for NLB mapping"
-  type        = string
+  description = "Availability zone(s) for NLB mapping. String for single AZ, list(string) for multi-AZ"
+  type        = list(string)
 }
 
 variable "address_type" {
