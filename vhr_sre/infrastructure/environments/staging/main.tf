@@ -107,6 +107,8 @@ module "ack" {
   node_instance_types = ["ecs.c6.large"]
   enable_autoscaling  = true
   enable_dr           = false
+  enable_istio        = true
+  enable_argo_rollouts = true
 
   tags = {
     environment = var.environment

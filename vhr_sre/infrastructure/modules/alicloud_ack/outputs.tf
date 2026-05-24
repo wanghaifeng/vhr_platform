@@ -76,6 +76,16 @@ output "dr_enabled" {
   value       = var.enable_dr
 }
 
+output "istio_enabled" {
+  description = "Istio service mesh enabled status"
+  value       = var.enable_istio
+}
+
+output "argo_rollouts_enabled" {
+  description = "Argo Rollouts enabled status"
+  value       = var.enable_argo_rollouts
+}
+
 # Cluster Summary
 output "clusters" {
   description = "Summary of all clusters"

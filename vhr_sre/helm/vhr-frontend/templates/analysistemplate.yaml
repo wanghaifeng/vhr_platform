@@ -1,0 +1,38 @@
+{{- if and .Values.rollout.enabled .Values.rollout.canary.analysis.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+  labels:
+    {{- include "vhr-frontend.labels" . | nindent 4 }}
+spec:
+  args:
+    - name: service
+  metrics:
+    - name: success-rate
+      interval: 30s
+      count: 6
+      successLimit: 4
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-operated.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{status!~"5.*",app="{{args.service}}"}[1m]))
+            /
+            sum(rate(http_requests_total{app="{{args.service}}"}[1m]))
+    - name: latency-p99
+      interval: 30s
+      count: 6
+      successLimit: 4
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus-operated.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{app="{{args.service}}"}[1m]))
+              by (le)
+            )
+      successCondition: result < 0.5
+{{- end }}

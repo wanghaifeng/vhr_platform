@@ -119,7 +119,9 @@ module "ack" {
 
   node_instance_types = ["ecs.c6.2xlarge"]
   enable_autoscaling  = true
-  enable_dr           = true # Production enables DR by default in this architecture
+  enable_dr           = true
+  enable_istio        = true
+  enable_argo_rollouts = true
 
   tags = {
     environment = var.environment

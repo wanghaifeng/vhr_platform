@@ -50,6 +50,22 @@ resource "alicloud_cs_managed_kubernetes" "primary" {
   })
 }
 
+# Istio Service Mesh Addon - Primary Cluster
+resource "alicloud_cs_kubernetes_addon" "istio_primary" {
+  count     = var.enable_istio ? 1 : 0
+  cluster_id = alicloud_cs_managed_kubernetes.primary.id
+  name       = "istio"
+  version    = var.istio_version != "" ? var.istio_version : null
+}
+
+# Istio Service Mesh Addon - Secondary Cluster (DR)
+resource "alicloud_cs_kubernetes_addon" "istio_secondary" {
+  count     = var.enable_istio && var.enable_dr ? 1 : 0
+  cluster_id = alicloud_cs_managed_kubernetes.secondary[0].id
+  name       = "istio"
+  version    = var.istio_version != "" ? var.istio_version : null
+}
+
 # Secondary Kubernetes Cluster (DR)
 resource "alicloud_cs_managed_kubernetes" "secondary" {
   count = var.enable_dr ? 1 : 0

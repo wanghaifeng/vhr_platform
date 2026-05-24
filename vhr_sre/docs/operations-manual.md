@@ -4,6 +4,8 @@
 - [Daily Operations](#daily-operations)
 - [Troubleshooting](#troubleshooting)
 - [Deployment Operations](#deployment-operations)
+- [Progressive Delivery (Canary & Blue-Green)](#progressive-delivery-canary--blue-green)
+- [Istio Service Mesh Operations](#istio-service-mesh-operations)
 - [Monitoring & Alerting](#monitoring--alerting)
 - [Security Operations](#security-operations)
 - [Backup & Recovery](#backup--recovery)
@@ -250,6 +252,148 @@ kubectl autoscale deployment vhr-frontend -n vhr-prod \
 
 ---
 
+## Progressive Delivery (Canary & Blue-Green)
+
+> **Environments**: staging, prod (Argo Rollouts + Istio)
+> **Documentation**: See [progressive-delivery.md](./progressive-delivery/progressive-delivery.md) for full details
+
+### 1. Canary Deployment
+
+#### Trigger a Canary Release
+```bash
+# Update the image tag to trigger a new rollout
+kubectl argo rollouts set image vhr-frontend frontend=registry.cn-beijing.aliyuncs.com/vhr/frontend:v1.2.3 -n vhr-prod
+
+# Watch the canary progress
+kubectl argo rollouts get rollout vhr-frontend -n vhr-prod --watch
+```
+
+#### Canary Steps (prod)
+| Step | Weight | Duration | Description |
+|------|--------|----------|-------------|
+| 1 | 1% | 5 min | Initial canary - minimal traffic exposure |
+| 2 | 5% | 5 min | Early validation with small traffic share |
+| 3 | 20% | 5 min | Moderate traffic - analysis starts |
+| 4 | 40% | 5 min | Significant traffic shift |
+| 5 | 60% | 5 min | Majority traffic on canary |
+| 6 | 80% | 5 min | Near-complete migration |
+| 7 | 100% | - | Full promotion |
+
+#### Manual Promotion / Abort
+```bash
+# Promote to next step immediately
+kubectl argo rollouts promote vhr-frontend -n vhr-prod
+
+# Promote fully (skip all remaining steps)
+kubectl argo rollouts promote vhr-frontend -n vhr-prod --full
+
+# Abort canary and rollback to stable
+kubectl argo rollouts abort vhr-frontend -n vhr-prod
+```
+
+### 2. Blue-Green Deployment
+
+#### Trigger a Blue-Green Release
+```bash
+# Switch strategy to blue-green in values file, then:
+helm upgrade vhr-frontend ./vhr_sre/helm/vhr-frontend \
+  -f ./vhr_sre/helm/vhr-frontend/values-prod.yaml \
+  --set rollout.strategy=blueGreen \
+  --set image.tag=v1.2.3 \
+  --namespace vhr-prod
+```
+
+#### Blue-Green Workflow
+```
+1. New "preview" ReplicaSet created with new version
+2. Preview pods pass health checks
+3. Auto-promotion after 30s (configurable via autoPromotionSeconds)
+4. Service switched from preview to active
+5. Old ReplicaSet scaled down after scaleDownDelayRevisionLimit
+```
+
+#### Manual Switch
+```bash
+# Promote preview to active
+kubectl argo rollouts promote vhr-frontend -n vhr-prod
+
+# Rollback to previous active version
+kubectl argo rollouts undo vhr-frontend -n vhr-prod
+```
+
+### 3. Rollout Status & History
+```bash
+# View current rollout status
+kubectl argo rollouts get rollout vhr-frontend -n vhr-prod
+
+# View rollout history
+kubectl argo rollouts list rollouts -n vhr-prod
+
+# View analysis runs
+kubectl get analysisrun -n vhr-prod
+
+# View analysis templates
+kubectl get analysistemplate -n vhr-prod
+```
+
+---
+
+## Istio Service Mesh Operations
+
+> **Environments**: staging, prod
+
+### 1. Istio Health Check
+```bash
+# Check Istiod status
+kubectl get pods -n istio-system
+kubectl logs -l app=istiod -n istio-system --tail=50
+
+# Check sidecar injection
+kubectl get namespaces -L istio-injection
+kubectl get pods -n vhr-prod -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[*].name}{"\n"}{end}'
+```
+
+### 2. Traffic Management
+```bash
+# View VirtualServices
+kubectl get virtualservice -n vhr-prod
+kubectl describe virtualservice vhr-frontend -n vhr-prod
+
+# View DestinationRules
+kubectl get destinationrule -n vhr-prod
+kubectl describe destinationrule vhr-frontend -n vhr-prod
+
+# View current traffic split (canary weights)
+kubectl get virtualservice vhr-frontend -n vhr-prod \
+  -o jsonpath='{.spec.http[0].route[*].weight}'
+```
+
+### 3. Istio Debugging
+```bash
+# Check proxy status
+istioctl proxy-status
+
+# Check proxy config for a specific pod
+istioctl proxy-config routes <pod-name>.vhr-prod
+
+# Check cluster config
+istioctl proxy-config clusters <pod-name>.vhr-prod
+
+# Generate proxy config dump
+istioctl proxy-config all <pod-name>.vhr-prod > proxy-dump.yaml
+```
+
+### 4. mTLS Verification
+```bash
+# Check mTLS status
+istioctl analyze -n vhr-prod
+
+# Verify peer authentication
+kubectl get peerauthentication -A
+```
+
+---
+
 ## Monitoring & Alerting
 
 ### 1. Prometheus Queries
@@ -385,9 +529,10 @@ kubectl create secret generic db-credentials \
 
 #### Database Backup
 ```bash
-# RDS auto backup (Alibaba Cloud console)
-# Daily at 2:00 AM
-# Retention: 7 days
+# RDS auto backup (managed by alicloud_db_backup_policy)
+# - dev/test/perf: daily backup, 7-day retention, log backup disabled
+# - staging: daily backup, 7-day retention, log backup disabled
+# - prod: daily backup at 02:00-03:00 UTC, 30-day retention, log backup enabled (30-day)
 
 # Manual backup
 aliyun rds CreateBackup --DBInstanceId <instance-id>
@@ -398,8 +543,9 @@ aliyun rds DescribeBackups --DBInstanceId <instance-id>
 
 #### Redis Backup
 ```bash
-# Redis cluster auto backup
-# Console config: Daily backup, 7 days retention
+# Redis backup (managed by enable_backup_log on alicloud_kvstore_instance)
+# - dev/test/perf/staging: log backup disabled
+# - prod: log backup enabled (enable_backup_log=1)
 ```
 
 ### 2. K8s Resource Backup

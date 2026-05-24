@@ -1,0 +1,67 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "vhr-frontend.fullname" . }}
+  labels:
+    {{- include "vhr-frontend.labels" . | nindent 4 }}
+spec:
+  host: {{ include "vhr-frontend.fullname" . }}
+  trafficPolicy:
+    connectionPool:
+      http:
+        h2UpgradePolicy: DEFAULT
+        maxRequestsPerConnection: 100
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+  {{- if .Values.rollout.enabled }}
+  subsets:
+    - name: stable
+      labels:
+        role: stable
+    - name: canary
+      labels:
+        role: canary
+  {{- end }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "vhr-frontend.fullname" . }}
+  labels:
+    {{- include "vhr-frontend.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.istio.host }}
+  hosts:
+    - {{ .Values.istio.host }}
+  {{- else }}
+  hosts:
+    - {{ include "vhr-frontend.fullname" . }}
+  {{- end }}
+  gateways:
+    - {{ .Values.istio.gateway }}
+  http:
+    - name: primary
+      route:
+        {{- if .Values.rollout.enabled }}
+        - destination:
+            host: {{ include "vhr-frontend.fullname" . }}
+            subset: stable
+          weight: 100
+        - destination:
+            host: {{ include "vhr-frontend.fullname" . }}
+            subset: canary
+          weight: 0
+        {{- else }}
+        - destination:
+            host: {{ include "vhr-frontend.fullname" . }}
+          weight: 100
+        {{- end }}
+      retries:
+        attempts: {{ .Values.istio.retries.attempts }}
+        perTryTimeout: {{ .Values.istio.retries.perTryTimeout }}
+        retryOn: {{ .Values.istio.retries.retryOn }}
+{{- end }}

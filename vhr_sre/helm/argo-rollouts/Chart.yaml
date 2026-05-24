@@ -1,0 +1,17 @@
+apiVersion: v2
+name: argo-rollouts
+description: Argo Rollouts - Progressive Delivery for Kubernetes with Istio integration
+type: application
+version: 0.1.0
+appVersion: "1.7.2"
+keywords:
+  - argo
+  - rollouts
+  - canary
+  - blue-green
+  - istio
+  - progressive-delivery
+dependencies:
+  - name: argo-rollouts
+    version: "2.37.8"
+    repository: "https://argoproj.github.io/argo-helm"

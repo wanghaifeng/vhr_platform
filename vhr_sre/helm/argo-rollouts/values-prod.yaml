@@ -1,0 +1,24 @@
+argo-rollouts:
+  controller:
+    replicas: 2
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    nodeSelector:
+      role: worker
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: argo-rollouts
+              topologyKey: kubernetes.io/hostname
+
+istioIntegration:
+  enabled: true

@@ -27,3 +27,21 @@ autoscaling:
   enabled: true
   minReplicas: 2
   maxReplicas: 5
+
+rollout:
+  enabled: true
+  strategy: canary
+  canary:
+    steps:
+      - setWeight: 5
+      - pause: { duration: 60s }
+      - setWeight: 20
+      - pause: { duration: 120s }
+      - setWeight: 50
+      - pause: { duration: 120s }
+    analysis:
+      enabled: true
+
+istio:
+  enabled: true
+  host: vhr-staging.example.com

@@ -95,3 +95,42 @@ readinessProbe:
   periodSeconds: 5
   timeoutSeconds: 3
   failureThreshold: 3
+
+rollout:
+  enabled: false
+  strategy: canary
+  canary:
+    steps:
+      - setWeight: 5
+      - pause: { duration: 30s }
+      - setWeight: 20
+      - pause: { duration: 60s }
+      - setWeight: 40
+      - pause: { duration: 60s }
+      - setWeight: 60
+      - pause: { duration: 60s }
+      - setWeight: 80
+      - pause: { duration: 60s }
+    analysis:
+      enabled: false
+      templates:
+        - name: success-rate
+      args:
+        - name: service
+          value: "{{ .Release.Name }}-canary"
+  blueGreen:
+    activeService: ""
+    previewService: ""
+    autoPromotionEnabled: true
+    scaleDownDelayRevisionLimit: 1
+    previewReplicaCount: 1
+    autoPromotionSeconds: 30
+
+istio:
+  enabled: false
+  host: ""
+  gateway: istio-system/default-gateway
+  retries:
+    attempts: 3
+    perTryTimeout: 2s
+    retryOn: 5xx,reset,connect-failure,refused-stream

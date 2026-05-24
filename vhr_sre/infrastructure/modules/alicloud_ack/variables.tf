@@ -85,6 +85,24 @@ variable "enable_dr" {
   default     = false
 }
 
+variable "enable_istio" {
+  description = "Enable Istio service mesh addon on the cluster(s)"
+  type        = bool
+  default     = false
+}
+
+variable "istio_version" {
+  description = "Istio addon version (leave empty for provider default)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_argo_rollouts" {
+  description = "Enable Argo Rollouts for progressive delivery (blue-green and canary) with Istio integration"
+  type        = bool
+  default     = false
+}
+
 variable "key_name" {
   description = "SSH key pair name"
   type        = string

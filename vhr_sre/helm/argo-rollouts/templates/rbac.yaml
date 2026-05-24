@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-rollouts-istio-sa
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argo-rollouts-istio-role
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+  - apiGroups: ["networking.istio.io"]
+    resources: ["virtualservices", "destinationrules"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["argoproj.io"]
+    resources: ["rollouts", "rollouts/status"]
+    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: ["analysis.argoproj.io"]
+    resources: ["analysistemplates", "analysisruns"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argo-rollouts-istio-binding
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-rollouts-istio-role
+subjects:
+  - kind: ServiceAccount
+    name: argo-rollouts-istio-sa
+    namespace: {{ .Release.Namespace }}
