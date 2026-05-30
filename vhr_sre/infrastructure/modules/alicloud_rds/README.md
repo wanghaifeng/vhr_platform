@@ -1,37 +1,37 @@
 # alicloud_rds
 
-管理阿里云 RDS MySQL 实例，支持高可用/AlwaysOn 部署、自动备份策略、日志备份和白名单配置。
+Manages Alibaba Cloud RDS MySQL instances, supporting HighAvailability/AlwaysOn deployment, automated backup policies, log backup, and IP whitelist configuration.
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| environment | 部署环境 | string | - | yes |
-| vpc_id | VPC ID | string | - | yes |
-| db_vswitch_id | 数据库 VSwitch ID | string | - | yes |
-| availability_zone | 主可用区 | string | - | yes |
-| dr_availability_zone | 灾备可用区（高可用部署） | string | "" | no |
-| dr_vswitch_id | 灾备 VSwitch ID（高可用部署） | string | "" | no |
-| category | RDS 实例系列：Basic、HighAvailability、AlwaysOn | string | "Basic" | no |
-| security_ip_list | 允许连接的 IP 地址列表 | list(string) | ["10.0.0.0/8"] | no |
-| mysql_version | MySQL 引擎版本 | string | "5.7" | no |
-| mysql_instance_type | RDS 实例规格 | string | "rds.mysql.s2.large" | no |
-| mysql_instance_storage | RDS 实例存储大小（GB） | number | 20 | no |
-| mysql_root_username | MySQL Root 用户名 | string | "root" | no |
-| mysql_root_password | MySQL Root 密码 | string (sensitive) | - | yes |
-| backup_period | 备份周期（星期几） | set(string) | ["Monday"..."Sunday"] | no |
-| backup_time | 备份开始时间窗口（UTC） | string | "02:00Z-03:00Z" | no |
-| backup_retention_period | 备份保留天数 | number | 7 | no |
-| enable_backup_log | 是否启用日志备份 | bool | false | no |
-| log_backup_retention_period | 日志备份保留天数 | number | 7 | no |
+| environment | Deployment environment | string | - | yes |
+| vpc_id | The ID of the VPC | string | - | yes |
+| db_vswitch_id | The ID of the database VSwitch | string | - | yes |
+| availability_zone | The primary availability zone | string | - | yes |
+| dr_availability_zone | The DR availability zone for HA deployment | string | "" | no |
+| dr_vswitch_id | The ID of the DR VSwitch for HA deployment | string | "" | no |
+| category | RDS instance category: Basic, HighAvailability, AlwaysOn | string | "Basic" | no |
+| security_ip_list | List of IP addresses allowed to connect | list(string) | ["10.0.0.0/8"] | no |
+| mysql_version | MySQL engine version | string | "5.7" | no |
+| mysql_instance_type | RDS instance type | string | "rds.mysql.s2.large" | no |
+| mysql_instance_storage | RDS instance storage in GB | number | 20 | no |
+| mysql_root_username | Root username for MySQL | string | "root" | no |
+| mysql_root_password | Root password for MySQL | string (sensitive) | - | yes |
+| backup_period | Backup period days | set(string) | ["Monday"..."Sunday"] | no |
+| backup_time | Backup start time window in UTC | string | "02:00Z-03:00Z" | no |
+| backup_retention_period | Number of days to retain backups | number | 7 | no |
+| enable_backup_log | Whether to enable log backup | bool | false | no |
+| log_backup_retention_period | Number of days to retain log backups | number | 7 | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| rds_instance_id | RDS 实例 ID |
-| rds_connection_string | RDS 连接字符串 |
-| rds_port | RDS 端口 |
+| rds_instance_id | The ID of the RDS instance |
+| rds_connection_string | The connection string of the RDS instance |
+| rds_port | The port of the RDS instance |
 
 ## Example Usage
 

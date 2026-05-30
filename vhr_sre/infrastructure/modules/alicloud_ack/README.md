@@ -1,58 +1,58 @@
 # alicloud_ack
 
-管理阿里云 ACK（Container Service for Kubernetes）集群，支持主集群和灾备集群的创建，以及 Istio 服务网格和 Argo Rollouts 渐进式交付等附加组件的启用。
+Manages Alibaba Cloud ACK (Container Service for Kubernetes) clusters, supporting primary and DR cluster creation, Istio service mesh, and Argo Rollouts progressive delivery addons.
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| cluster_name | Kubernetes 集群名称 | string | - | yes |
-| vswitch_ids | 主集群节点使用的 VSwitch ID 列表 | list(string) | - | yes |
-| dr_vswitch_ids | 灾备集群节点使用的 VSwitch ID 列表 | list(string) | [] | no |
-| security_group_id | 集群节点安全组 ID | string | - | yes |
-| k8s_version | Kubernetes 版本 | string | "1.24" | no |
-| service_cidr | 主集群 Service CIDR | string | "172.19.0.0/20" | no |
-| pod_cidr | 主集群 Pod CIDR | string | "10.99.0.0/16" | no |
-| dr_service_cidr | 灾备集群 Service CIDR | string | "172.20.0.0/20" | no |
-| dr_pod_cidr | 灾备集群 Pod CIDR | string | "10.100.0.0/16" | no |
-| node_instance_types | 工作节点实例规格列表 | list(string) | ["ecs.c6.large"] | no |
-| node_count | 工作节点数量 | number | 3 | no |
-| min_node_count | 自动扩缩容最小节点数 | number | 2 | no |
-| max_node_count | 自动扩缩容最大节点数 | number | 10 | no |
-| enable_autoscaling | 启用集群自动扩缩容 | bool | true | no |
-| enable_dr | 启用灾备（创建二级集群） | bool | false | no |
-| enable_istio | 在集群上启用 Istio 服务网格附加组件 | bool | false | no |
-| istio_version | Istio 附加组件版本（留空使用提供商默认值） | string | "" | no |
-| enable_argo_rollouts | 启用 Argo Rollouts 渐进式交付 | bool | false | no |
-| key_name | SSH 密钥对名称 | string | "" | no |
-| system_disk_size | 系统盘大小（GB） | number | 100 | no |
-| data_disk_size | 数据盘大小（GB） | number | 200 | no |
-| user_data | 节点初始化用户数据脚本 | string | "" | no |
-| node_labels | 应用到工作节点的标签 | map(string) | {} | no |
-| node_taints | 应用到工作节点的污点 | list(object) | [] | no |
-| maintenance_time | 维护窗口开始时间（HH:MM:SS） | string | "02:00:00" | no |
-| tags | 应用到资源的标签 | map(string) | {} | no |
+| cluster_name | Name of the Kubernetes cluster | string | - | yes |
+| vswitch_ids | List of vswitch IDs for primary cluster nodes | list(string) | - | yes |
+| dr_vswitch_ids | List of vswitch IDs for secondary cluster nodes (DR) | list(string) | [] | no |
+| security_group_id | Security group ID for cluster nodes | string | - | yes |
+| k8s_version | Kubernetes version | string | "1.24" | no |
+| service_cidr | Service CIDR for primary cluster | string | "172.19.0.0/20" | no |
+| pod_cidr | Pod CIDR for primary cluster | string | "10.99.0.0/16" | no |
+| dr_service_cidr | Service CIDR for secondary cluster (DR) | string | "172.20.0.0/20" | no |
+| dr_pod_cidr | Pod CIDR for secondary cluster (DR) | string | "10.100.0.0/16" | no |
+| node_instance_types | Instance types for worker nodes | list(string) | ["ecs.c6.large"] | no |
+| node_count | Number of worker nodes | number | 3 | no |
+| min_node_count | Minimum number of nodes for autoscaling | number | 2 | no |
+| max_node_count | Maximum number of nodes for autoscaling | number | 10 | no |
+| enable_autoscaling | Enable cluster autoscaling | bool | true | no |
+| enable_dr | Enable disaster recovery (secondary cluster) | bool | false | no |
+| enable_istio | Enable Istio service mesh addon on the cluster(s) | bool | false | no |
+| istio_version | Istio addon version (leave empty for provider default) | string | "" | no |
+| enable_argo_rollouts | Enable Argo Rollouts for progressive delivery | bool | false | no |
+| key_name | SSH key pair name | string | "" | no |
+| system_disk_size | System disk size in GB | number | 100 | no |
+| data_disk_size | Data disk size in GB | number | 200 | no |
+| user_data | User data script for node initialization | string | "" | no |
+| node_labels | Labels to apply to worker nodes | map(string) | {} | no |
+| node_taints | Taints to apply to worker nodes | list(object) | [] | no |
+| maintenance_time | Maintenance window start time (HH:MM:SS) | string | "02:00:00" | no |
+| tags | Tags to apply to resources | map(string) | {} | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| primary_cluster_id | 主集群 ID |
-| primary_cluster_name | 主集群名称 |
-| primary_cluster_endpoint | 主集群 API Server 端点 |
-| primary_cluster_version | 主集群 Kubernetes 版本 |
-| primary_worker_role_arn | 主集群工作节点 RAM 角色 ARN |
-| primary_security_group_id | 主集群安全组 ID |
-| secondary_cluster_id | 灾备集群 ID |
-| secondary_cluster_name | 灾备集群名称 |
-| secondary_cluster_endpoint | 灾备集群 API Server 端点 |
-| secondary_cluster_version | 灾备集群 Kubernetes 版本 |
-| primary_node_pool_id | 主集群节点池 ID |
-| secondary_node_pool_id | 灾备集群节点池 ID |
-| dr_enabled | 灾备是否已启用 |
-| istio_enabled | Istio 是否已启用 |
-| argo_rollouts_enabled | Argo Rollouts 是否已启用 |
-| clusters | 所有集群信息汇总 |
+| primary_cluster_id | Primary cluster ID |
+| primary_cluster_name | Primary cluster name |
+| primary_cluster_endpoint | Primary cluster API Server endpoint |
+| primary_cluster_version | Primary cluster Kubernetes version |
+| primary_worker_role_arn | Primary cluster worker RAM role ARN |
+| primary_security_group_id | Primary cluster security group ID |
+| secondary_cluster_id | Secondary cluster ID (DR) |
+| secondary_cluster_name | Secondary cluster name (DR) |
+| secondary_cluster_endpoint | Secondary cluster API Server endpoint (DR) |
+| secondary_cluster_version | Secondary cluster Kubernetes version (DR) |
+| primary_node_pool_id | Primary cluster node pool ID |
+| secondary_node_pool_id | Secondary cluster node pool ID (DR) |
+| dr_enabled | Disaster recovery enabled status |
+| istio_enabled | Istio service mesh enabled status |
+| argo_rollouts_enabled | Argo Rollouts enabled status |
+| clusters | Summary of all clusters |
 
 ## Example Usage
 

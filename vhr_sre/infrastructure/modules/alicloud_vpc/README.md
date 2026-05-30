@@ -1,36 +1,36 @@
 # alicloud_vpc
 
-管理阿里云 VPC 网络及子网，创建前端、后端、数据库和灾备 VSwitch，并配置对应的安全组规则。
+Manages Alibaba Cloud VPC and subnets, creating frontend, backend, database, and DR VSwitches with corresponding security group rules.
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| vpc_name | VPC 名称 | string | - | yes |
-| cidr_block | VPC CIDR 网段 | string | "10.0.0.0/16" | no |
-| frontend_cidr | 前端子网 CIDR | string | - | yes |
-| backend_cidr | 后端子网 CIDR | string | - | yes |
-| db_cidr | 数据库子网 CIDR | string | - | yes |
-| dr_cidr | 灾备子网 CIDR | string | "" | no |
-| allowed_db_ports | 数据库安全组允许的端口列表 | list(string) | ["3306","6379","5672"] | no |
-| allowed_external_cidrs | 允许的外部 CIDR 列表 | list(string) | [] | no |
-| environment | 部署环境 | string | - | yes |
+| vpc_name | The name of the VPC | string | - | yes |
+| cidr_block | The CIDR block for the VPC | string | "10.0.0.0/16" | no |
+| frontend_cidr | CIDR for frontend subnet | string | - | yes |
+| backend_cidr | CIDR for backend subnet | string | - | yes |
+| db_cidr | CIDR for database subnet | string | - | yes |
+| dr_cidr | CIDR for disaster recovery subnet | string | "" | no |
+| allowed_db_ports | List of ports allowed for database security group | list(string) | ["3306","6379","5672"] | no |
+| allowed_external_cidrs | List of external CIDR blocks allowed | list(string) | [] | no |
+| environment | Deployment environment | string | - | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| vpc_id | VPC ID |
-| frontend_vswitch_id | 前端 VSwitch ID |
-| backend_vswitch_id | 后端 VSwitch ID |
-| db_vswitch_id | 数据库 VSwitch ID |
-| dr_vswitch_id | 灾备 VSwitch ID |
-| web_security_group_id | Web 安全组 ID |
-| backend_security_group_id | 后端安全组 ID |
-| db_security_group_id | 数据库安全组 ID |
-| availability_zone | 主可用区 |
-| dr_availability_zone | 灾备可用区 |
-| backend_cidr | 后端子网 CIDR |
+| vpc_id | The ID of the VPC |
+| frontend_vswitch_id | The ID of the frontend VSwitch |
+| backend_vswitch_id | The ID of the backend VSwitch |
+| db_vswitch_id | The ID of the database VSwitch |
+| dr_vswitch_id | The ID of the DR VSwitch |
+| web_security_group_id | The ID of the web security group |
+| backend_security_group_id | The ID of the backend security group |
+| db_security_group_id | The ID of the database security group |
+| availability_zone | The primary availability zone |
+| dr_availability_zone | The DR availability zone |
+| backend_cidr | The CIDR block of the backend VSwitch |
 
 ## Example Usage
 

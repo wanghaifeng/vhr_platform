@@ -1,33 +1,33 @@
 # vhr-monitoring
 
-VHR 监控栈，基于 kube-prometheus-stack 部署 Prometheus + Grafana，并提供自定义告警规则。
+VHR monitoring stack based on kube-prometheus-stack, deploying Prometheus + Grafana with custom alerting rules.
 
-## 依赖项
+## Dependencies
 
-| 名称 | 版本 | 仓库 |
-|------|------|------|
+| Name | Version | Repository |
+|------|---------|------------|
 | kube-prometheus-stack | 45.0.0 | https://prometheus-community.github.io/helm-charts |
 
-## 配置
+## Configuration
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `kube-prometheus-stack.prometheus.prometheusSpec.retention` | string | `15d` | Prometheus 数据保留时间 |
-| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName` | string | `alicloud-disk-ssd` | 存储类 |
-| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage` | string | `50Gi` | 存储大小 |
-| `kube-prometheus-stack.grafana.adminPassword` | string | `admin` | Grafana 管理员密码 |
-| `customAlerts.enabled` | bool | `true` | 启用自定义告警规则 |
+| `kube-prometheus-stack.prometheus.prometheusSpec.retention` | string | `15d` | Prometheus data retention period |
+| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName` | string | `alicloud-disk-ssd` | Storage class |
+| `kube-prometheus-stack.prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage` | string | `50Gi` | Storage size |
+| `kube-prometheus-stack.grafana.adminPassword` | string | `admin` | Grafana admin password |
+| `customAlerts.enabled` | bool | `true` | Enable custom alerting rules |
 
-### 自定义告警规则
+### Custom Alert Rules
 
-- FrontendHighErrorRate - 前端高错误率
-- FrontendHighLatency - 前端高延迟
-- PodCrashLooping - Pod 崩溃循环
-- PodNotReady - Pod 未就绪
-- HighMemoryUsage - 高内存使用率
-- HighCPUUsage - 高 CPU 使用率
+- FrontendHighErrorRate - Frontend high error rate
+- FrontendHighLatency - Frontend high latency
+- PodCrashLooping - Pod crash looping
+- PodNotReady - Pod not ready
+- HighMemoryUsage - High memory usage
+- HighCPUUsage - High CPU usage
 
-## 安装
+## Installation
 
 ```bash
 # dev

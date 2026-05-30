@@ -1,32 +1,32 @@
 # alicloud_kvstore
 
-管理阿里云 KVStore（Redis）实例，支持跨可用区高可用部署、备份策略和白名单配置。
+Manages Alibaba Cloud KVStore (Redis) instances, supporting cross-AZ high availability deployment, backup policies, and IP whitelist configuration.
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| environment | 部署环境 | string | - | yes |
-| vpc_id | VPC ID | string | - | yes |
-| db_vswitch_id | 数据库 VSwitch ID | string | - | yes |
-| availability_zone | 主可用区 | string | - | yes |
-| dr_availability_zone | 灾备可用区（跨 AZ 高可用） | string | "" | no |
-| dr_vswitch_id | 灾备 VSwitch ID（跨 AZ 高可用） | string | "" | no |
-| security_ip_list | 允许连接的 IP 地址列表 | list(string) | ["10.0.0.0/8"] | no |
-| redis_version | Redis 引擎版本 | string | "5.0" | no |
-| redis_instance_type | Redis 实例类型（Redis 或 Memcache） | string | "Redis" | no |
-| redis_instance_class | Redis 实例规格 | string | "redis.master.small.default" | no |
-| redis_instance_storage | Redis 实例存储大小（GB） | number | 20 | no |
-| redis_password | Redis 实例密码 | string (sensitive) | "" | no |
-| enable_backup_log | 是否启用日志备份（1=启用，0=禁用） | number | 0 | no |
+| environment | Deployment environment | string | - | yes |
+| vpc_id | The ID of the VPC | string | - | yes |
+| db_vswitch_id | The ID of the database VSwitch | string | - | yes |
+| availability_zone | The primary availability zone | string | - | yes |
+| dr_availability_zone | The DR availability zone for cross-AZ HA | string | "" | no |
+| dr_vswitch_id | The ID of the DR VSwitch for cross-AZ HA | string | "" | no |
+| security_ip_list | List of IP addresses allowed to connect | list(string) | ["10.0.0.0/8"] | no |
+| redis_version | Redis engine version | string | "5.0" | no |
+| redis_instance_type | Redis instance type (Redis or Memcache) | string | "Redis" | no |
+| redis_instance_class | Redis instance class | string | "redis.master.small.default" | no |
+| redis_instance_storage | Redis instance storage in GB | number | 20 | no |
+| redis_password | Password for Redis instance | string (sensitive) | "" | no |
+| enable_backup_log | Whether to enable log backup (1=enabled, 0=disabled) | number | 0 | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| redis_instance_id | Redis 实例 ID |
-| redis_connection_string | Redis 连接字符串 |
-| redis_port | Redis 端口 |
+| redis_instance_id | The ID of the Redis instance |
+| redis_connection_string | The connection string of the Redis instance |
+| redis_port | The port of the Redis instance |
 
 ## Example Usage
 

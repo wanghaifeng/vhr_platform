@@ -1,30 +1,30 @@
 # alicloud_nlb
 
-管理阿里云网络型负载均衡（NLB），支持多可用区部署、TCP/TCPSSL 监听及后端服务器组配置。
+Manages Alibaba Cloud Network Load Balancer (NLB), supporting multi-AZ deployment, TCP/TCPSSL listeners, and backend server group configuration.
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|----------|
-| environment | 环境名称 | string | - | yes |
+| environment | Environment name | string | - | yes |
 | vpc_id | VPC ID | string | - | yes |
-| vswitch_id | 可用区映射的 VSwitch ID 列表（多 AZ 时为列表） | list(string) | - | yes |
-| availability_zone | 可用区映射的可用区列表（多 AZ 时为列表） | list(string) | - | yes |
-| address_type | 地址类型：Internet 或 Intranet | string | "Internet" | no |
-| backend_server_ids | 后端服务器 ID 列表 | list(string) | - | yes |
-| backend_server_count | 后端服务器数量 | number | 0 | no |
-| backend_port | Nginx Ingress Controller 使用的端口 | number | 80 | no |
-| enable_https | 启用 TCP 443 监听 | bool | false | no |
-| ssl_certificate_id | TCPSSL 监听使用的 SSL 证书 ID | string | "" | no |
-| enable_ssl_at_nlb | 在 NLB 上启用 SSL 终止 | bool | false | no |
+| vswitch_id | VSwitch ID(s) for zone mappings (list for multi-AZ) | list(string) | - | yes |
+| availability_zone | Availability zone(s) for NLB mapping (list for multi-AZ) | list(string) | - | yes |
+| address_type | Address type: Internet or Intranet | string | "Internet" | no |
+| backend_server_ids | List of backend server IDs | list(string) | - | yes |
+| backend_server_count | Number of backend servers | number | 0 | no |
+| backend_port | Port used by Nginx Ingress Controller | number | 80 | no |
+| enable_https | Enable TCP 443 listener | bool | false | no |
+| ssl_certificate_id | SSL certificate ID for TCPSSL listener | string | "" | no |
+| enable_ssl_at_nlb | Enable SSL termination at NLB | bool | false | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| nlb_id | NLB 实例 ID |
-| nlb_dns_name | NLB DNS 名称 |
-| server_group_id | 后端服务器组 ID |
+| nlb_id | NLB instance ID |
+| nlb_dns_name | NLB DNS name |
+| server_group_id | NLB Server Group ID |
 
 ## Example Usage
 

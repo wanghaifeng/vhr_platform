@@ -1,27 +1,27 @@
 # argo-rollouts
 
-Argo Rollouts - 基于 Kubernetes 的渐进式交付控制器，集成 Istio 流量管理，支持 Canary 和 Blue-Green 发布策略。
+Argo Rollouts - Kubernetes progressive delivery controller with Istio traffic management integration, supporting Canary and Blue-Green deployment strategies.
 
-## 依赖项
+## Dependencies
 
-| 名称 | 版本 | 仓库 |
-|------|------|------|
+| Name | Version | Repository |
+|------|---------|------------|
 | argo-rollouts | 2.37.8 | https://argoproj.github.io/argo-helm |
 
-## 配置
+## Configuration
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `argo-rollouts.controller.metrics.enabled` | bool | `true` | 启用控制器指标 |
-| `argo-rollouts.controller.metrics.serviceMonitor.enabled` | bool | `true` | 启用 ServiceMonitor |
-| `argo-rollouts.dashboard.enabled` | bool | `true` | 启用 Dashboard |
-| `argo-rollouts.dashboard.service.type` | string | `ClusterIP` | Dashboard Service 类型 |
-| `argo-rollouts.dashboard.service.port` | number | `3100` | Dashboard 端口 |
-| `argo-rollouts.installCRDs` | bool | `true` | 安装 CRD |
-| `istioIntegration.enabled` | bool | `true` | 启用 Istio 集成 |
-| `istioIntegration.namespace` | string | `istio-system` | Istio 命名空间 |
+| `argo-rollouts.controller.metrics.enabled` | bool | `true` | Enable controller metrics |
+| `argo-rollouts.controller.metrics.serviceMonitor.enabled` | bool | `true` | Enable ServiceMonitor |
+| `argo-rollouts.dashboard.enabled` | bool | `true` | Enable Dashboard |
+| `argo-rollouts.dashboard.service.type` | string | `ClusterIP` | Dashboard Service type |
+| `argo-rollouts.dashboard.service.port` | number | `3100` | Dashboard port |
+| `argo-rollouts.installCRDs` | bool | `true` | Install CRDs |
+| `istioIntegration.enabled` | bool | `true` | Enable Istio integration |
+| `istioIntegration.namespace` | string | `istio-system` | Istio namespace |
 
-## 安装
+## Installation
 
 ```bash
 # dev
