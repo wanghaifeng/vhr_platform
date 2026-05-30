@@ -1,0 +1,111 @@
+name: Pre-Commit Validation
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  terraform-validation:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.head_commit.modified, '.tf') ||
+      contains(github.event.head_commit.added, '.tf') ||
+      contains(join(github.event.pull_request.files.*.filename, ' '), '.tf')
+    defaults:
+      run:
+        working-directory: vhr_sre/infrastructure
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14"
+
+      - name: Terraform Format Check
+        run: terraform fmt -recursive -check
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.52.0
+
+      - name: TFLint
+        run: tflint --recursive
+
+  terraform-security:
+    name: Terraform Security Scan
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.head_commit.modified, '.tf') ||
+      contains(github.event.head_commit.added, '.tf') ||
+      contains(join(github.event.pull_request.files.*.filename, ' '), '.tf')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          soft_fail: false
+          working_directory: vhr_sre/infrastructure
+
+  helm-validation:
+    name: Helm Chart Validation
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.head_commit.modified, 'helm/') ||
+      contains(github.event.head_commit.added, 'helm/') ||
+      contains(join(github.event.pull_request.files.*.filename, ' '), 'helm/')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: "v3.15.0"
+
+      - name: Helm Lint
+        run: |
+          for chart in $(find helm -name Chart.yaml -exec dirname {} \;); do
+            echo "Linting $chart"
+            helm lint $chart
+          done
+
+      - name: Helm Template (validate rendering)
+        run: |
+          for env in dev test staging prod; do
+            echo "Templating vhr-frontend for $env"
+            helm template vhr-frontend ./helm/vhr-frontend \
+              -f ./helm/vhr-frontend/values-$env.yaml \
+              --namespace vhr-$env > /dev/null
+          done
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,6 @@
+changelog-generator=true
+doc-generator=true
+git-hooks-manager=true
+helm-linter=true
+terraform-linter=true
+terraform-security-scanner=true
